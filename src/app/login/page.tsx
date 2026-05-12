@@ -12,12 +12,11 @@ export default function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === "teste@gmail.com" && password === "123456") {
-      router.push("/aluno");
-    } else if (email === "testeadm@gmail.com" && password === "123456") {
+    // Login liberado temporariamente para qualquer credencial
+    if (email.toLowerCase().includes("adm") || email.toLowerCase().includes("admin")) {
       router.push("/admin");
     } else {
-      alert("Credenciais inválidas");
+      router.push("/aluno");
     }
   };
 
