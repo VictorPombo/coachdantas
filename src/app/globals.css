@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #0A0A0A;
+  --color-brand-secondary: #FFFFFF;
+  --color-brand-support: #2D2D2D;
+  --color-brand-accent: #EAB308;
+  --color-brand-accent-hover: #CA8A04;
+  --color-brand-highlight: #1B2A4A;
+  --color-brand-neon: #FDE047;
+}
+
+@layer base {
+  :root {
+    --background: #0A0A0A;
+    --foreground: #FFFFFF;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-outfit), sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
