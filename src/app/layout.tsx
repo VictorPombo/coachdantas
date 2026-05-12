@@ -39,7 +39,6 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} antialiased`}
     >
       <body className="min-h-screen bg-brand-primary text-brand-secondary flex flex-col font-sans">
-        <Header />
         {children}
       </body>
     </html>

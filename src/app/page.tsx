@@ -9,9 +9,12 @@ import { Location } from "@/components/sections/Location";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 
+import { Header } from "@/components/ui/Header";
+
 export default function Home() {
   return (
     <main>
+      <Header />
       <Hero />
       <Stats />
       <Modalities />
