@@ -11,25 +11,26 @@ export default function AlunoDashboard() {
         <p className="text-gray-400">Você já treinou 3 dias nessa semana.</p>
       </div>
 
-      {/* Streak */}
-      <div className="bg-gradient-to-br from-brand-accent/20 to-brand-primary p-6 rounded-3xl border border-brand-accent/20 flex flex-col items-center justify-center text-center relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-accent/20 rounded-full blur-[50px]"></div>
-        <Flame className="w-16 h-16 text-brand-accent mb-2 animate-pulse" />
-        <div className="text-5xl font-bold text-white mb-2">12</div>
-        <div className="text-sm uppercase tracking-widest font-medium text-brand-accent">Treinos Seguidos</div>
-        
-        <div className="w-full max-w-xs mt-6">
-          <div className="flex justify-between text-xs font-bold text-gray-400 mb-2">
-            <span>Streak atual</span>
-            <span className="text-brand-accent">Meta: 15</span>
-          </div>
-          <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-brand-accent w-[80%] rounded-full shadow-[0_0_10px_#EAB308]"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        {/* Streak */}
+        <div className="bg-gradient-to-br from-brand-accent/20 to-brand-primary p-6 rounded-3xl border border-brand-accent/20 flex flex-col items-center justify-center text-center relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-accent/20 rounded-full blur-[50px]"></div>
+          <Flame className="w-16 h-16 text-brand-accent mb-2 animate-pulse" />
+          <div className="text-5xl font-bold text-white mb-2">12</div>
+          <div className="text-sm uppercase tracking-widest font-medium text-brand-accent">Treinos Seguidos</div>
+          
+          <div className="w-full max-w-xs mt-6">
+            <div className="flex justify-between text-xs font-bold text-gray-400 mb-2">
+              <span>Streak atual</span>
+              <span className="text-brand-accent">Meta: 15</span>
+            </div>
+            <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-brand-accent w-[80%] rounded-full shadow-[0_0_10px_#EAB308]"></div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
         {/* Próxima Aula */}
         <div className="bg-brand-support p-6 rounded-2xl border border-white/5">
           <div className="flex justify-between items-center mb-4">
@@ -69,6 +70,7 @@ export default function AlunoDashboard() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
 

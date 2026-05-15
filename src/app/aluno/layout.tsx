@@ -78,7 +78,7 @@ export default function AlunoLayout({ children }: { children: React.ReactNode })
         {/* Glow effects */}
         <div className="absolute top-0 left-0 w-full h-96 bg-brand-neon/5 blur-[150px] -z-10 pointer-events-none"></div>
         
-        <div className="max-w-2xl mx-auto p-4 md:p-8">
+        <div className="max-w-7xl mx-auto p-4 md:p-8">
           {children}
         </div>
       </main>
