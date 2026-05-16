@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LineChart, Trophy, User, LogOut } from "lucide-react";
+import { Home, LineChart, Trophy, User, LogOut, QrCode, Dumbbell, ShoppingBag } from "lucide-react";
 
 export default function AlunoLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const navItems = [
     { name: "Início", href: "/aluno", icon: Home },
-    { name: "Evolução", href: "/aluno/evolucao", icon: LineChart },
+    { name: "Treinos", href: "/aluno/treinos", icon: Dumbbell },
+    { name: "QR Code", href: "/aluno/qr-code", icon: QrCode },
     { name: "Conquistas", href: "/aluno/conquistas", icon: Trophy },
+    { name: "Loja", href: "/aluno/loja", icon: ShoppingBag },
     { name: "Perfil", href: "/aluno/perfil", icon: User },
   ];
 
@@ -24,7 +26,7 @@ export default function AlunoLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center p-3 w-1/4 relative ${
+              className={`flex flex-col items-center p-3 flex-1 relative ${
                 isActive ? "text-brand-neon" : "text-gray-400 hover:text-white"
               }`}
             >

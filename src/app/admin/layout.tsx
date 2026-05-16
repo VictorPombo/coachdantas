@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, LogOut, Dumbbell, PlaySquare, ShoppingBag } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -10,6 +10,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Alunos", href: "/admin/alunos", icon: Users },
+    { name: "Treinos", href: "/admin/treinos", icon: Dumbbell },
+    { name: "Biblioteca", href: "/admin/biblioteca", icon: PlaySquare },
+    { name: "Loja", href: "/admin/loja", icon: ShoppingBag },
     { name: "Agenda", href: "/admin/agenda", icon: CalendarDays },
     { name: "Financeiro", href: "/admin/financeiro", icon: Wallet },
     { name: "Config", href: "/admin/config", icon: Settings },
@@ -25,7 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center p-3 w-1/5 ${
+              className={`flex flex-col items-center p-3 flex-1 ${
                 isActive ? "text-brand-accent" : "text-gray-400 hover:text-white"
               }`}
             >
