@@ -1,7 +1,25 @@
 import { Users, TrendingUp, DollarSign, AlertCircle, Dumbbell } from "lucide-react";
 import Link from "next/link";
+import {
+  getAdminDashboardStats,
+  getTodayClasses,
+  getPastDueStudents,
+} from "@/lib/queries";
 
-export default function AdminDashboard() {
+function formatCurrency(value: number) {
+  if (value >= 1000) {
+    return `R$ ${(value / 1000).toFixed(1).replace(".", ",")}k`;
+  }
+  return `R$ ${value.toFixed(2).replace(".", ",")}`;
+}
+
+export default async function AdminDashboard() {
+  const [stats, todayClasses, pastDueStudents] = await Promise.all([
+    getAdminDashboardStats(),
+    getTodayClasses(),
+    getPastDueStudents(),
+  ]);
+
   return (
     <div className="space-y-8">
       <div>
@@ -17,7 +35,7 @@ export default function AdminDashboard() {
               <Users className="w-5 h-5 text-brand-neon" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">84</div>
+          <div className="text-3xl font-bold mb-1">{stats.activeStudents}</div>
           <div className="text-sm text-gray-400">Alunos ativos</div>
         </div>
 
@@ -27,7 +45,7 @@ export default function AdminDashboard() {
               <Dumbbell className="w-5 h-5 text-brand-accent" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">12</div>
+          <div className="text-3xl font-bold mb-1">{todayClasses.length}</div>
           <div className="text-sm text-gray-400">Aulas hoje</div>
         </div>
 
@@ -37,7 +55,9 @@ export default function AdminDashboard() {
               <TrendingUp className="w-5 h-5 text-green-400" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">R$ 28k</div>
+          <div className="text-3xl font-bold mb-1">
+            {formatCurrency(stats.monthlyRevenue)}
+          </div>
           <div className="text-sm text-gray-400">Faturamento no mês</div>
         </div>
 
@@ -47,7 +67,9 @@ export default function AdminDashboard() {
               <DollarSign className="w-5 h-5 text-red-400" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-red-400 mb-1">3</div>
+          <div className="text-3xl font-bold text-red-400 mb-1">
+            {stats.pastDueCount}
+          </div>
           <div className="text-sm text-gray-400">Pagamentos pendentes</div>
         </div>
       </div>
@@ -57,31 +79,50 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 bg-brand-support rounded-3xl border border-white/5 p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">Aulas de Hoje</h2>
-            <Link href="/admin/agenda" className="text-sm text-brand-accent hover:underline">Ver agenda completa</Link>
+            <Link
+              href="/admin/agenda"
+              className="text-sm text-brand-accent hover:underline"
+            >
+              Ver agenda completa
+            </Link>
           </div>
           <div className="space-y-3">
-            {[
-              { hora: "06:00", local: "Tatame", alunos: 4, limite: 6, modalidade: "Funcional Inteligente" },
-              { hora: "07:00", local: "Tatame", alunos: 6, limite: 6, modalidade: "Surf Training" },
-              { hora: "16:00", local: "Piscina", alunos: 2, limite: 4, modalidade: "Natação" },
-              { hora: "18:00", local: "Tatame", alunos: 5, limite: 6, modalidade: "Natural Move" },
-            ].map((aula, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 bg-brand-primary rounded-xl border border-white/5 hover:border-white/10 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="font-bold text-lg text-brand-neon">{aula.hora}</div>
-                  <div>
-                    <div className="font-medium">{aula.modalidade}</div>
-                    <div className="text-sm text-gray-400">{aula.local}</div>
+            {todayClasses.length === 0 ? (
+              <p className="text-gray-400 text-sm text-center py-8">
+                Nenhuma aula cadastrada para hoje.
+              </p>
+            ) : (
+              todayClasses.map((aula) => (
+                <div
+                  key={aula.id}
+                  className="flex items-center justify-between p-4 bg-brand-primary rounded-xl border border-white/5 hover:border-white/10 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="font-bold text-lg text-brand-neon">
+                      {aula.hora}
+                    </div>
+                    <div>
+                      <div className="font-medium">{aula.modalidade}</div>
+                      <div className="text-sm text-gray-400">{aula.local}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-bold bg-white/5 px-3 py-1 rounded-full">
+                      <span
+                        className={
+                          aula.alunos >= aula.limite
+                            ? "text-brand-accent"
+                            : "text-white"
+                        }
+                      >
+                        {aula.alunos}
+                      </span>
+                      <span className="text-gray-500">/{aula.limite} vagas</span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold bg-white/5 px-3 py-1 rounded-full">
-                    <span className={aula.alunos === aula.limite ? "text-brand-accent" : "text-white"}>{aula.alunos}</span>
-                    <span className="text-gray-500">/{aula.limite} vagas</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -92,17 +133,45 @@ export default function AdminDashboard() {
             Atenção
           </h2>
           <div className="space-y-4">
+            {/* Inadimplentes */}
             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-              <h3 className="font-bold text-red-400 text-sm mb-1">Atrasados (3)</h3>
-              <p className="text-sm text-gray-400 mb-3">R$ 1.548,00 pendentes</p>
-              <button className="w-full py-2 bg-red-500/20 text-red-400 text-sm font-bold rounded-lg hover:bg-red-500/30 transition-colors">
+              <h3 className="font-bold text-red-400 text-sm mb-1">
+                Atrasados ({stats.pastDueCount})
+              </h3>
+              {stats.pastDueCount > 0 ? (
+                <>
+                  <p className="text-sm text-gray-400 mb-3">
+                    {formatCurrency(stats.pastDueAmount)} pendentes
+                  </p>
+                  <ul className="mb-3 space-y-1">
+                    {pastDueStudents.slice(0, 3).map((s) => (
+                      <li key={s.id} className="text-xs text-gray-300 truncate">
+                        • {s.name} — {s.plan}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <p className="text-sm text-gray-400 mb-3">Nenhum em atraso 🎉</p>
+              )}
+              <Link
+                href="/admin/financeiro"
+                className="w-full py-2 bg-red-500/20 text-red-400 text-sm font-bold rounded-lg hover:bg-red-500/30 transition-colors block text-center"
+              >
                 Ver Inadimplentes
-              </button>
+              </Link>
             </div>
-            
+
+            {/* Inativos */}
             <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-              <h3 className="font-bold text-yellow-400 text-sm mb-1">Inativos (2)</h3>
-              <p className="text-sm text-gray-400 mb-3">Mais de 15 dias sem vir</p>
+              <h3 className="font-bold text-yellow-400 text-sm mb-1">
+                Inativos ({stats.inactiveCount})
+              </h3>
+              <p className="text-sm text-gray-400 mb-3">
+                {stats.inactiveCount > 0
+                  ? "Mais de 15 dias sem vir"
+                  : "Todos estão frequentando 💪"}
+              </p>
               <button className="w-full py-2 bg-yellow-500/20 text-yellow-400 text-sm font-bold rounded-lg hover:bg-yellow-500/30 transition-colors">
                 Chamar no WhatsApp
               </button>

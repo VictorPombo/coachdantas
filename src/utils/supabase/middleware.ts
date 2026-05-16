@@ -15,7 +15,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({
             request,
           });
@@ -27,20 +27,45 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // refreshing the auth token
+  // Refresh the auth token — IMPORTANT: do not remove this call
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Basic routing logic based on user roles will go here later
-  // Temporarily disabled so we can view the mocked pages without actual login.
-  /*
-  if (!user && (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/aluno'))) {
+  const { pathname } = request.nextUrl;
+  const isProtected = pathname.startsWith("/admin") || pathname.startsWith("/aluno");
+
+  // 1. Redirect unauthenticated users to /login
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-  */
+
+  // 2. Enforce role-based access
+  if (user && isProtected) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const role = profile?.role;
+
+    // Student trying to access /admin → redirect to /aluno
+    if (role === "student" && pathname.startsWith("/admin")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/aluno";
+      return NextResponse.redirect(url);
+    }
+
+    // Admin trying to access /aluno → redirect to /admin
+    if (role === "admin" && pathname.startsWith("/aluno")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
+  }
 
   return supabaseResponse;
 }

@@ -1,12 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { login } from "./actions";
 
 export default function Login() {
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    
+    startTransition(async () => {
+      const result = await login(formData);
+      if (result?.error) {
+        // Translate common Supabase errors
+        if (result.error === "Invalid login credentials") {
+          setError("E-mail ou senha inválidos.");
+        } else {
+          setError(result.error);
+        }
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-brand-primary">
       <main className="flex-1 flex items-center justify-center p-4">
@@ -15,31 +35,74 @@ export default function Login() {
             <Link href="/" className="font-bold text-2xl tracking-tighter inline-block mb-6">
               COACH<span className="text-brand-accent">DANTAS</span>
             </Link>
-            <h1 className="text-2xl font-bold mb-2">Acesso Demonstrativo</h1>
-            <p className="text-gray-400">Escolha qual painel você deseja testar.</p>
+            <h1 className="text-2xl font-bold mb-2">Acesso ao Portal</h1>
+            <p className="text-gray-400">Insira suas credenciais para continuar.</p>
           </div>
 
-          <div className="bg-brand-support p-8 rounded-3xl border border-white/5 space-y-4 shadow-2xl">
+          <form onSubmit={handleSubmit} className="bg-brand-support p-8 rounded-3xl border border-white/5 space-y-6 shadow-2xl">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+                {error}
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1" htmlFor="email">
+                  E-mail
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="Seu e-mail"
+                  className="w-full bg-brand-primary border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1" htmlFor="password">
+                  Senha
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Sua senha"
+                  className="w-full bg-brand-primary border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+            </div>
+
             <button
-              onClick={() => router.push("/aluno")}
-              className="w-full bg-brand-accent hover:bg-brand-accent-hover text-brand-primary font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-105"
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-brand-accent hover:bg-brand-accent-hover text-brand-primary font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-70 disabled:hover:scale-100"
             >
-              Entrar como Aluno
-              <ArrowRight className="w-5 h-5" />
+              {isPending ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                <>
+                  Entrar
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
             </button>
             
-            <button
-              onClick={() => router.push("/admin")}
-              className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all border border-white/10 transform hover:scale-105"
-            >
-              Entrar como Administrador
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            
-            <p className="text-xs text-center text-gray-500 mt-6">
-              O sistema está com os logins abertos temporariamente para facilitar a visualização do design e das telas antes de conectarmos o banco de dados.
-            </p>
-          </div>
+            <div className="text-center mt-6">
+              <p className="text-xs text-gray-500">
+                Dados para teste:<br/>
+                admin@coachdantas.com (Admin)<br/>
+                victor@aluno.com (Aluno)<br/>
+                Senha: password123
+              </p>
+            </div>
+          </form>
         </div>
       </main>
     </div>

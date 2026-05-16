@@ -1,9 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
-// import { updateSession } from "@/utils/supabase/middleware";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/utils/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  // Supabase auth is temporarily bypassed for UI mocking
-  return NextResponse.next();
+  return await updateSession(request);
 }
 
 export const config = {

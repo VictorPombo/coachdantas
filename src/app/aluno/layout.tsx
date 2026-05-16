@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LineChart, Trophy, User, LogOut, QrCode, Dumbbell, ShoppingBag } from "lucide-react";
+import { Home, LineChart, Trophy, User, QrCode, Dumbbell, ShoppingBag } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default function AlunoLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -68,10 +69,7 @@ export default function AlunoLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <Link href="/login" className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-medium">
-            <LogOut className="w-5 h-5" />
-            Sair
-          </Link>
+          <LogoutButton />
         </div>
       </aside>
 
