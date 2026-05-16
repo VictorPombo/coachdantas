@@ -38,6 +38,29 @@ export async function getEmbedding(
   return data.embedding as number[]
 }
 
+// Busca todos os embeddings cadastrados (para login 1:N)
+export async function getAllEmbeddings(
+  supabase: SupabaseClient
+): Promise<{ userId: string; embedding: number[] }[]> {
+  const { data, error } = await supabase
+    .from('face_embeddings')
+    .select('user_id, embedding')
+
+  if (error || !data) return []
+
+  return data.map(row => {
+    let parsed: number[] = []
+    if (typeof row.embedding === 'string') {
+      try {
+        parsed = JSON.parse(row.embedding)
+      } catch {}
+    } else {
+      parsed = row.embedding as number[]
+    }
+    return { userId: row.user_id, embedding: parsed }
+  }).filter(row => row.embedding.length > 0)
+}
+
 // Salva ou substitui embedding de um usuário
 export async function upsertEmbedding(
   supabase: SupabaseClient,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight, Loader2, KeyRound, ScanFace } from "lucide-react";
+import { ArrowRight, Loader2, KeyRound, ScanFace, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { login } from "./actions";
 import { FaceLoginForm } from "./FaceLoginForm";
@@ -10,6 +10,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [loginMethod, setLoginMethod] = useState<"password" | "facial">("password");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -95,14 +96,27 @@ export default function Login() {
                     <label className="block text-sm font-medium text-gray-400 mb-1" htmlFor="password">
                       Senha
                     </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      placeholder="Sua senha"
-                      className="w-full bg-brand-primary border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors"
-                    />
+                    <div className="relative">
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        placeholder="Sua senha"
+                        className="w-full bg-brand-primary border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -128,14 +142,6 @@ export default function Login() {
               <FaceLoginForm />
             )}
             
-            <div className="text-center mt-6">
-              <p className="text-xs text-gray-500">
-                Dados para teste:<br/>
-                admin@coachdantas.com (Admin)<br/>
-                victor@aluno.com (Aluno)<br/>
-                Senha: password123
-              </p>
-            </div>
           </div>
         </div>
       </main>

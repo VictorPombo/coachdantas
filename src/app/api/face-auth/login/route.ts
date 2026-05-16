@@ -1,30 +1,31 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
-import { getEmbedding, createSession, updateSessionResult } from '@/face-auth-core/database/queries'
-import { verifyIdentity } from '@/face-auth-core/FaceVerification'
+import { getAllEmbeddings, createSession, updateSessionResult } from '@/face-auth-core/database/queries'
+import { euclideanDistance } from '@/face-auth-core/FaceVerification'
 
 // Limite simples de tentativas em memória
+// Agora indexado pelo IP ou 'global' já que não temos o email primeiro
 const rateLimits = new Map<string, { attempts: number, lastAttempt: number }>()
 
 export async function POST(request: Request) {
   try {
-    const { email, embedding } = await request.json()
+    const { embedding } = await request.json()
 
-    if (!email || !embedding || !Array.isArray(embedding)) {
+    if (!embedding || !Array.isArray(embedding)) {
       return NextResponse.json({ error: 'Parâmetros inválidos.' }, { status: 400 })
     }
 
-    // 1. Rate Limiting (máximo 3 tentativas por minuto)
+    // 1. Rate Limiting (máximo 5 tentativas por minuto global/IP)
+    const ip = request.headers.get('x-forwarded-for') || 'global'
     const now = Date.now()
-    const rl = rateLimits.get(email) || { attempts: 0, lastAttempt: 0 }
+    const rl = rateLimits.get(ip) || { attempts: 0, lastAttempt: 0 }
     
-    // Se passaram 5 minutos, reseta as tentativas
     if (now - rl.lastAttempt > 5 * 60 * 1000) {
       rl.attempts = 0
     }
 
-    if (rl.attempts >= 3) {
+    if (rl.attempts >= 5) {
       return NextResponse.json({ error: 'Muitas tentativas falhas. Bloqueado por 5 minutos.' }, { status: 429 })
     }
 
@@ -33,54 +34,64 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // 2. Busca userId pelo email em auth.users
-    const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers()
-    if (error) throw error
+    // 2. Busca todos os embeddings (1:N search)
+    const allEmbeddings = await getAllEmbeddings(supabaseAdmin)
 
-    const user = users.find(u => u.email === email)
-
-    if (!user) {
+    if (allEmbeddings.length === 0) {
       rl.attempts += 1
       rl.lastAttempt = now
-      rateLimits.set(email, rl)
-      return NextResponse.json({ error: 'Credenciais inválidas ou rosto não reconhecido.' }, { status: 401 })
+      rateLimits.set(ip, rl)
+      return NextResponse.json({ error: 'Nenhuma biometria cadastrada no sistema.' }, { status: 401 })
     }
 
-    const userId = user.id
+    // 3. Calcula a distância de todos os usuários em relação ao rosto capturado
+    const sorted = allEmbeddings
+      .map(({ userId, embedding: storedEmbedding }) => ({
+        userId,
+        distance: euclideanDistance(embedding, storedEmbedding)
+      }))
+      .sort((a, b) => a.distance - b.distance)
 
-    // Registra sessão de auditoria
-    const session = await createSession(supabaseAdmin, userId, 'login', 5)
+    const best = sorted[0]
+    const second = sorted[1]
 
-    // 3. Busca embedding cadastrado
-    const storedEmbedding = await getEmbedding(supabaseAdmin, userId)
+    // 4. Regra de Segurança Rigorosa
+    // 1. Melhor match tem distância < 0.45 (alta confiança)
+    // 2. Gap entre 1º e 2º lugar é > 0.15 (match inequívoco)
+    const approved = 
+      best.distance < 0.45 && 
+      (!second || (second.distance - best.distance) > 0.15)
 
-    if (!storedEmbedding) {
+    if (!approved) {
       rl.attempts += 1
       rl.lastAttempt = now
-      rateLimits.set(email, rl)
-      await updateSessionResult(supabaseAdmin, session.token, { passed: false, distance: 1 })
-      return NextResponse.json({ error: 'Usuário não possui biometria cadastrada.' }, { status: 401 })
+      rateLimits.set(ip, rl)
+      
+      // Registra a tentativa falha
+      const session = await createSession(supabaseAdmin, best.userId, 'login_1_n', 5)
+      await updateSessionResult(supabaseAdmin, session.token, { passed: false, distance: best.distance })
+      
+      return NextResponse.json({ error: 'Não foi possível identificar. Use login com senha.' }, { status: 401 })
     }
 
-    // 4. Calcula distância euclidiana
-    const result = verifyIdentity(embedding, storedEmbedding)
+    const userId = best.userId
 
-    await updateSessionResult(supabaseAdmin, session.token, result)
-
-    if (!result.passed) {
-      rl.attempts += 1
-      rl.lastAttempt = now
-      rateLimits.set(email, rl)
-      return NextResponse.json({ error: 'Rosto não reconhecido.' }, { status: 401 })
-    }
+    // Registra auditoria de sucesso
+    const session = await createSession(supabaseAdmin, userId, 'login_1_n', 5)
+    await updateSessionResult(supabaseAdmin, session.token, { passed: true, distance: best.distance })
 
     // Reset rate limits on success
-    rateLimits.delete(email)
+    rateLimits.delete(ip)
 
-    // 5. Cria sessão
-    // NOTA: Como `supabaseAdmin.auth.admin.createSession` não existe na versão atual do JS Client,
-    // o método oficial para criar uma sessão programaticamente sem senha é usar um token administrativo
-    // gerado silenciosamente e verificá-lo (isso seta os cookies de sessão SSR no Next.js).
+    // 5. Encontra o e-mail do usuário validado para gerar a sessão
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
+    if (userError || !user || !user.email) {
+      return NextResponse.json({ error: 'Conta de usuário inválida.' }, { status: 500 })
+    }
+
+    const email = user.email
+
+    // 6. Cria sessão mágica programaticamente
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: email,
@@ -88,7 +99,7 @@ export async function POST(request: Request) {
 
     if (linkError) throw linkError
 
-    // 6. Seta os cookies na resposta através do cliente SSR
+    // 7. Seta os cookies na resposta através do cliente SSR
     const supabaseServer = await createClient()
     const { error: otpError } = await supabaseServer.auth.verifyOtp({
       token_hash: linkData.properties.hashed_token,
@@ -97,8 +108,8 @@ export async function POST(request: Request) {
 
     if (otpError) throw otpError
 
-    // 7. Retorna sucesso para o Frontend redirecionar
-    return NextResponse.json({ success: true })
+    // Retorna sucesso para o Frontend redirecionar
+    return NextResponse.json({ success: true, email })
   } catch (error: any) {
     console.error('[FaceAuth API - Login]', error)
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 })
