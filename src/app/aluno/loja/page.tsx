@@ -6,27 +6,27 @@ export default function LojaAlunoPage() {
   const produtos = [
     {
       id: 1,
-      nome: "Workshop: Execução Perfeita",
-      tipo: "Evento Online",
-      preco: "R$ 47,90",
+      nome: "Desafio 30 Dias: Surf Fitness (Vídeos + PDF)",
+      tipo: "Programa Completo",
+      preco: "R$ 97,00",
       destaque: true,
-      imagem: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop",
+      imagem: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?q=80&w=800&auto=format&fit=crop",
     },
     {
       id: 2,
-      nome: "E-book: Nutrição para Hipertrofia",
-      tipo: "Digital",
-      preco: "R$ 29,90",
+      nome: "E-book: Preparação Física para Surf e Skate",
+      tipo: "E-book Digital",
+      preco: "R$ 47,90",
       destaque: false,
-      imagem: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop",
+      imagem: "https://images.unsplash.com/photo-1564982752979-3f7bc974d29a?q=80&w=800&auto=format&fit=crop",
     },
     {
       id: 3,
-      nome: "Mentoria Individual (1h)",
-      tipo: "Serviço",
-      preco: "R$ 150,00",
+      nome: "Planilha Avançada: Explosão e Equilíbrio",
+      tipo: "Planilha de Treino",
+      preco: "R$ 67,00",
       destaque: false,
-      imagem: "https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=800&auto=format&fit=crop",
+      imagem: "https://images.unsplash.com/photo-1526405779038-eeb66b56bc4b?q=80&w=800&auto=format&fit=crop",
     }
   ];
 

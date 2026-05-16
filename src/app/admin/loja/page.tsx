@@ -5,17 +5,17 @@ import { Plus, Package, DollarSign, TrendingUp, MoreVertical } from "lucide-reac
 
 export default function AdminLojaPage() {
   const mockProdutos = [
-    { id: 1, nome: "Workshop Execução", preco: "R$ 47,90", vendas: 24, status: "Ativo" },
-    { id: 2, nome: "E-book Nutrição", preco: "R$ 29,90", vendas: 58, status: "Ativo" },
-    { id: 3, nome: "Mentoria 1h", preco: "R$ 150,00", vendas: 12, status: "Pausado" },
+    { id: 1, nome: "Desafio 30 Dias: Surf Fitness", preco: "R$ 97,00", vendas: 45, status: "Ativo" },
+    { id: 2, nome: "E-book: Preparação Surf e Skate", preco: "R$ 47,90", vendas: 128, status: "Ativo" },
+    { id: 3, nome: "Planilha Avançada: Explosão", preco: "R$ 67,00", vendas: 32, status: "Pausado" },
   ];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Loja & Produtos</h1>
-          <p className="text-gray-400 mt-1">Gerencie seus infoprodutos e serviços adicionais</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Loja de Infoprodutos</h1>
+          <p className="text-gray-400 mt-1">Gerencie seus programas de treino, e-books e desafios</p>
         </div>
         <button className="bg-brand-accent hover:bg-brand-accent/90 text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-2">
           <Plus className="w-5 h-5" />
