@@ -1,20 +1,45 @@
 import { Settings, CreditCard, Clock, Bell, Share2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
+import { hasEnrollment } from "@/face-auth-core/database/queries";
+import { FaceAuthSection } from "./FaceAuthSection";
 
-export default function AlunoPerfil() {
+export default async function AlunoPerfil() {
+  const supabase = await createClient();
+  
+  // 1. Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null; // Middleware prevents this, but just in case
+
+  // 2. Get profile data
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  const userName = profile?.full_name || "Aluno";
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  // 3. Check if user has enrolled their face
+  const isEnrolled = await hasEnrollment(supabase, user.id);
+
   return (
     <div className="space-y-8">
       {/* Header do Perfil */}
       <div className="bg-brand-support rounded-3xl border border-white/5 p-8 text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/10 rounded-bl-[100px]"></div>
         <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-brand-accent to-brand-neon flex items-center justify-center text-4xl font-bold text-brand-primary mb-4 relative z-10">
-          V
+          {userInitial}
         </div>
-        <h1 className="text-2xl font-bold mb-1">Victor Assis</h1>
+        <h1 className="text-2xl font-bold mb-1">{userName}</h1>
         <div className="text-sm text-brand-accent font-medium mb-4">Guerreiro 🗡️ • 2.450 XP</div>
         <p className="text-gray-400 text-sm max-w-sm mx-auto">
           Treinando forte há 8 meses. Foco em condicionamento físico e ganho de massa.
         </p>
       </div>
+
+      {/* Seção Face Auth */}
+      <FaceAuthSection userId={user.id} initialIsEnrolled={isEnrolled} />
 
       {/* Plano e Financeiro */}
       <div className="bg-brand-support rounded-2xl border border-white/5 p-6">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LineChart, Trophy, User, QrCode, Dumbbell, ShoppingBag } from "lucide-react";
+import { Home, LineChart, Trophy, User, ScanFace, Dumbbell, ShoppingBag } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 
 export default function AlunoLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +11,7 @@ export default function AlunoLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: "Início", href: "/aluno", icon: Home },
     { name: "Treinos", href: "/aluno/treinos", icon: Dumbbell },
-    { name: "QR Code", href: "/aluno/qr-code", icon: QrCode },
+    { name: "Facial", href: "/aluno/qr-code", icon: ScanFace },
     { name: "Conquistas", href: "/aluno/conquistas", icon: Trophy },
     { name: "Loja", href: "/aluno/loja", icon: ShoppingBag },
     { name: "Perfil", href: "/aluno/perfil", icon: User },
