@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { FaceCameraWidget } from "./FaceCameraWidget"
+import { FaceTermsAccept } from "./FaceTermsAccept"
 import { enrollFace } from "../FaceEnrollment"
 import { CheckCircle2, ShieldCheck } from "lucide-react"
 
@@ -11,7 +12,7 @@ export interface FaceEnrollmentFlowProps {
   onError?: (error: string) => void
 }
 
-type Step = "intro" | "camera" | "success"
+type Step = "intro" | "terms" | "camera" | "success"
 
 export function FaceEnrollmentFlow({ userId, onComplete, onError }: FaceEnrollmentFlowProps) {
   const [step, setStep] = useState<Step>("intro")
@@ -54,13 +55,22 @@ export function FaceEnrollmentFlow({ userId, onComplete, onError }: FaceEnrollme
         
         <div className="space-y-3">
           <button
-            onClick={() => setStep("camera")}
+            onClick={() => setStep("terms")}
             className="w-full py-4 bg-brand-accent text-white rounded-xl font-bold hover:bg-brand-accent/90 transition-all"
           >
             Começar Cadastro
           </button>
         </div>
       </div>
+    )
+  }
+
+  if (step === "terms") {
+    return (
+      <FaceTermsAccept 
+        onAccept={() => setStep("camera")} 
+        onCancel={() => setStep("intro")} 
+      />
     )
   }
 

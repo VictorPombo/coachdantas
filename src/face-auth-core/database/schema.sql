@@ -7,6 +7,7 @@ CREATE TABLE face_embeddings (
   user_id      UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   embedding    vector(128) NOT NULL,
   model_version TEXT DEFAULT 'ssdMobilenetv1',
+  terms_accepted_at TIMESTAMPTZ,
   enrolled_at  TIMESTAMPTZ DEFAULT NOW(),
   updated_at   TIMESTAMPTZ DEFAULT NOW()
 );

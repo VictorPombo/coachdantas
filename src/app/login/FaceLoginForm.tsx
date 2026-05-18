@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
+import { FaceTermsAccept } from "@/face-auth-core/components/FaceTermsAccept"
 
 // Importação dinâmica para evitar erro de SSR com face-api
 const FaceCameraWidget = dynamic(
@@ -13,7 +14,23 @@ const FaceCameraWidget = dynamic(
 export function FaceLoginForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [termsAcceptedThisSession, setTermsAcceptedThisSession] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    // Checa localStorage para evitar mostrar os termos sempre
+    const accepted = localStorage.getItem('face_terms_accepted') === 'true'
+    if (!accepted) {
+      setShowTerms(true)
+    }
+  }, [])
+
+  const handleAcceptTerms = () => {
+    localStorage.setItem('face_terms_accepted', 'true')
+    setTermsAcceptedThisSession(true)
+    setShowTerms(false)
+  }
 
   const handleCapture = async (videoElement: HTMLVideoElement) => {
     setIsProcessing(true)
@@ -23,18 +40,28 @@ export function FaceLoginForm() {
       // 1. Importa a função de extração dinamicamente para não quebrar SSR
       const { captureEmbedding } = await import("@/face-auth-core/FaceCapture")
       
-      // 2. Extrai o embedding usando o FaceCapture core
-      const embedding = await captureEmbedding(videoElement, () => {})
+      // 2. Extrai o embedding usando o FaceCapture core (modo ultra rápido para login)
+      const embedding = await captureEmbedding(videoElement, () => {}, { fastMode: true })
       
       // 3. Envia o embedding para o backend (1:N search)
       const res = await fetch('/api/face-auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ embedding: Array.from(embedding) })
+        body: JSON.stringify({ 
+          embedding: Array.from(embedding),
+          acceptedTerms: termsAcceptedThisSession
+        })
       })
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
+        
+        // Volta para os termos se o banco de dados exigir
+        if (errData.error === 'terms_required') {
+          setShowTerms(true)
+          throw new Error("Você precisa aceitar os termos antes de usar o reconhecimento facial.")
+        }
+        
         throw new Error(errData.error || "Falha na validação facial")
       }
 
@@ -46,6 +73,23 @@ export function FaceLoginForm() {
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  if (showTerms) {
+    return (
+      <div className="space-y-4">
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+            {errorMsg}
+          </div>
+        )}
+        <FaceTermsAccept 
+          onAccept={handleAcceptTerms} 
+          onCancel={() => window.location.reload()} 
+          isProcessing={isProcessing}
+        />
+      </div>
+    )
   }
 
   return (

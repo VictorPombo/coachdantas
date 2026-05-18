@@ -33,14 +33,21 @@ export async function extractEmbedding(
     await loadModels()
   }
 
-  const results = await faceapi
-    .detectSingleFace(image, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
-    .withFaceLandmarks()
-    .withFaceDescriptor()
+  const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.15 })
+  
+  try {
+    const results = await faceapi
+      .detectSingleFace(image, options)
+      .withFaceLandmarks()
+      .withFaceDescriptor()
 
-  if (!results) return null
+    if (!results) return null
 
-  return results.descriptor
+    return results.descriptor
+  } catch (err) {
+    console.error('[FaceCapture] extractEmbedding error:', err)
+    return null
+  }
 }
 
 /**
@@ -113,19 +120,33 @@ export function captureFrame(video: HTMLVideoElement): HTMLCanvasElement {
 
 /**
  * Full capture flow: takes 5 frames, evaluates brightness, averages embeddings.
+ * Supports fastMode to return immediately after the first successful frame.
  */
 export async function captureEmbedding(
   video: HTMLVideoElement,
-  onProgress?: (step: string) => void
+  onProgress?: (step: string) => void,
+  options?: { fastMode?: boolean; maxFrames?: number }
 ): Promise<number[]> {
   await loadModels()
   
   const frames: { canvas: HTMLCanvasElement; brightness: number; descriptor: Float32Array | null }[] = []
+  const maxFrames = options?.maxFrames || 5
+  const isFastMode = options?.fastMode || false
   
   onProgress?.('Capturando frames...')
   
-  // Capture 5 frames separated by 300ms
-  for (let i = 0; i < 5; i++) {
+  // Em fastMode, aguarda um frame curto para o canvas do vídeo sincronizar
+  // com o último frame detectado ao vivo antes de capturar
+  if (isFastMode) {
+    await new Promise((res) => setTimeout(res, 120))
+  }
+  
+  // Em fastMode tenta até 8 vezes com delay curto entre cada tentativa
+  // Em modo normal tenta 5 vezes com 300ms de intervalo
+  const totalAttempts = isFastMode ? 8 : maxFrames
+  const interFrameDelay = isFastMode ? 80 : 300
+
+  for (let i = 0; i < totalAttempts; i++) {
     const canvas = captureFrame(video)
     const brightness = calculateAverageBrightness(canvas)
     
@@ -136,7 +157,11 @@ export async function captureEmbedding(
     }
     
     frames.push({ canvas, brightness, descriptor })
-    await new Promise((res) => setTimeout(res, 300))
+    
+    // Don't wait after the last frame
+    if (i < totalAttempts - 1) {
+      await new Promise((res) => setTimeout(res, interFrameDelay))
+    }
   }
   
   // Filter out frames with no valid faces
@@ -147,10 +172,16 @@ export async function captureEmbedding(
     if (brightest && brightest.brightness < 60) {
       throw new Error('Iluminação insuficiente. Vá para um local mais claro.')
     }
-    throw new Error('Nenhum rosto válido detectado.')
+    throw new Error('Rosto não detectado. Remova óculos/acessórios, olhe direto para a câmera e garanta boa iluminação.')
   }
   
   onProgress?.('Processando biometria...')
+  
+  // Se estivermos em fastMode (ou tivermos apenas 1 frame válido), 
+  // não precisamos fazer média, basta retornar o primeiro
+  if (validFrames.length === 1) {
+    return Array.from(validFrames[0].descriptor!)
+  }
   
   // Averages the embeddings for higher resilience
   const vectorLength = 128
@@ -158,7 +189,6 @@ export async function captureEmbedding(
   
   validFrames.forEach((frame) => {
     for (let i = 0; i < vectorLength; i++) {
-      // We know descriptor is not null because we filtered above
       averageDescriptor[i] += frame.descriptor![i]
     }
   })

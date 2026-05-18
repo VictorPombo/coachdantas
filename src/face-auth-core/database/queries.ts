@@ -41,10 +41,10 @@ export async function getEmbedding(
 // Busca todos os embeddings cadastrados (para login 1:N)
 export async function getAllEmbeddings(
   supabase: SupabaseClient
-): Promise<{ userId: string; embedding: number[] }[]> {
+): Promise<{ userId: string; embedding: number[]; termsAcceptedAt: string | null }[]> {
   const { data, error } = await supabase
     .from('face_embeddings')
-    .select('user_id, embedding')
+    .select('user_id, embedding, terms_accepted_at')
 
   if (error || !data) return []
 
@@ -57,7 +57,11 @@ export async function getAllEmbeddings(
     } else {
       parsed = row.embedding as number[]
     }
-    return { userId: row.user_id, embedding: parsed }
+    return { 
+      userId: row.user_id, 
+      embedding: parsed,
+      termsAcceptedAt: row.terms_accepted_at 
+    }
   }).filter(row => row.embedding.length > 0)
 }
 
@@ -72,10 +76,39 @@ export async function upsertEmbedding(
   
   const { error } = await supabase.from('face_embeddings').insert({
     user_id: userId,
-    embedding: JSON.stringify(embedding)
+    embedding: JSON.stringify(embedding),
+    terms_accepted_at: new Date().toISOString()
   })
 
   if (error) throw new Error('Failed to save embedding: ' + error.message)
+}
+
+// Verifica se o usuário aceitou os termos (usuários legados podem ter null)
+export async function hasAcceptedTerms(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('face_embeddings')
+    .select('terms_accepted_at')
+    .eq('user_id', userId)
+    .single()
+    
+  if (error || !data) return false
+  return data.terms_accepted_at !== null
+}
+
+// Grava o aceite dos termos de um usuário (usado no login para migrar legados)
+export async function acceptTerms(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('face_embeddings')
+    .update({ terms_accepted_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    
+  if (error) throw new Error('Failed to update terms acceptance: ' + error.message)
 }
 
 // Verifica se usuário tem enrollment ativo

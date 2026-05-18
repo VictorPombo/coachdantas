@@ -25,8 +25,8 @@ export async function verifyFaceLogin(
   try {
     onProgress?.('Ajustando captura da face...')
     
-    // Captura o embedding
-    const embedding = await captureEmbedding(videoElement, onProgress)
+    // Captura o embedding (modo rápido para verificação)
+    const embedding = await captureEmbedding(videoElement, onProgress, { fastMode: true })
     
     onProgress?.('Verificando identidade...')
     

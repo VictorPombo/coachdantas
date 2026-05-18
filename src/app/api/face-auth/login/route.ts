@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
-import { getAllEmbeddings, createSession, updateSessionResult } from '@/face-auth-core/database/queries'
+import { getAllEmbeddings, createSession, updateSessionResult, acceptTerms } from '@/face-auth-core/database/queries'
 import { euclideanDistance } from '@/face-auth-core/FaceVerification'
 
 // Limite simples de tentativas em memória
@@ -10,7 +10,7 @@ const rateLimits = new Map<string, { attempts: number, lastAttempt: number }>()
 
 export async function POST(request: Request) {
   try {
-    const { embedding } = await request.json()
+    const { embedding, acceptedTerms } = await request.json()
 
     if (!embedding || !Array.isArray(embedding)) {
       return NextResponse.json({ error: 'Parâmetros inválidos.' }, { status: 400 })
@@ -46,8 +46,9 @@ export async function POST(request: Request) {
 
     // 3. Calcula a distância de todos os usuários em relação ao rosto capturado
     const sorted = allEmbeddings
-      .map(({ userId, embedding: storedEmbedding }) => ({
+      .map(({ userId, embedding: storedEmbedding, termsAcceptedAt }) => ({
         userId,
+        termsAcceptedAt,
         distance: euclideanDistance(embedding, storedEmbedding)
       }))
       .sort((a, b) => a.distance - b.distance)
@@ -72,6 +73,17 @@ export async function POST(request: Request) {
       await updateSessionResult(supabaseAdmin, session.token, { passed: false, distance: best.distance })
       
       return NextResponse.json({ error: 'Não foi possível identificar. Use login com senha.' }, { status: 401 })
+    }
+
+    // 5. Regra LGPD: Termos de Uso Obrigatórios
+    if (!best.termsAcceptedAt && !acceptedTerms) {
+      // Bloqueia sessão e pede para usuário aceitar os termos
+      return NextResponse.json({ error: 'terms_required' }, { status: 403 })
+    }
+
+    if (!best.termsAcceptedAt && acceptedTerms) {
+      // Grava o aceite silenciosamente para o usuário legado que acabou de aceitar
+      await acceptTerms(supabaseAdmin, best.userId)
     }
 
     const userId = best.userId

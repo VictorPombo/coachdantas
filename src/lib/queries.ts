@@ -163,3 +163,122 @@ export async function getPastDueStudents() {
     }) ?? []
   );
 }
+
+// -------------------------------------------------------
+// Leads (Contatos externos — TotalPass, etc.)
+// -------------------------------------------------------
+
+export async function getLeads(source?: string) {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("leads")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  if (source && source !== "all") {
+    query = query.eq("source", source);
+  }
+
+  const { data } = await query;
+  return data ?? [];
+}
+
+export async function createLead(lead: {
+  full_name: string;
+  phone: string;
+  source: string;
+  notes?: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("leads").insert(lead).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteLead(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").update({ is_active: false }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// -------------------------------------------------------
+// Campaigns (Ofertas / Promoções)
+// -------------------------------------------------------
+
+export async function getCampaigns() {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("campaigns")
+    .select("*, campaign_sends(count)")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  return (
+    data?.map((c) => {
+      const sendsRow = scalar<{ count: number }>(c.campaign_sends);
+      return {
+        ...c,
+        sends_count: sendsRow?.count ?? 0,
+      };
+    }) ?? []
+  );
+}
+
+export async function getCampaignById(id: string) {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("campaigns")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  return data;
+}
+
+export async function createCampaign(campaign: {
+  title: string;
+  message_template: string;
+  target_source?: string;
+}) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("campaigns").insert(campaign).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getCampaignLeads(campaignId: string, targetSource?: string | null) {
+  const supabase = await createClient();
+
+  // 1. Busca todos os leads elegíveis
+  let leadsQuery = supabase.from("leads").select("*").eq("is_active", true);
+  if (targetSource) {
+    leadsQuery = leadsQuery.eq("source", targetSource);
+  }
+  const { data: leads } = await leadsQuery;
+
+  // 2. Busca os que já foram enviados nesta campanha
+  const { data: sends } = await supabase
+    .from("campaign_sends")
+    .select("lead_id")
+    .eq("campaign_id", campaignId);
+
+  const sentIds = new Set(sends?.map((s) => s.lead_id) ?? []);
+
+  return (leads ?? []).map((lead) => ({
+    ...lead,
+    already_sent: sentIds.has(lead.id),
+  }));
+}
+
+export async function markCampaignSent(campaignId: string, leadId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("campaign_sends").insert({
+    campaign_id: campaignId,
+    lead_id: leadId,
+  });
+  if (error) throw new Error(error.message);
+}

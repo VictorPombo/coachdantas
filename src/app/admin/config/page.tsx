@@ -1,6 +1,17 @@
 import { Settings as SettingsIcon, MessageSquare, Trophy, Shield } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
+import { hasEnrollment } from "@/face-auth-core/database/queries";
+import { FaceAuthSection } from "@/app/aluno/perfil/FaceAuthSection";
 
-export default function AdminConfig() {
+export default async function AdminConfig() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let isEnrolled = false;
+  if (user) {
+    isEnrolled = await hasEnrollment(supabase, user.id);
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -55,14 +66,25 @@ export default function AdminConfig() {
               <Shield className="w-6 h-6 text-gray-400" />
               <h2 className="text-xl font-bold">Segurança & Acessos</h2>
             </div>
-            <div className="flex items-center justify-between p-3 bg-brand-primary rounded-xl border border-white/5 mb-2">
+            
+            <div className="flex items-center justify-between p-3 bg-brand-primary rounded-xl border border-white/5 mb-4">
               <div>
                 <div className="font-bold text-sm">Leandro Dantas</div>
                 <div className="text-xs text-brand-accent">Administrador Principal</div>
               </div>
               <button className="text-xs text-gray-400 hover:text-white">Editar</button>
             </div>
-            <button className="text-xs mt-2 text-brand-accent hover:underline">+ Adicionar Professor/Admin</button>
+            
+            <div className="mb-4">
+              <button className="text-xs text-brand-accent hover:underline">+ Adicionar Professor/Admin</button>
+            </div>
+
+            {user && (
+              <div className="pt-4 border-t border-white/10">
+                <FaceAuthSection userId={user.id} initialIsEnrolled={isEnrolled} />
+              </div>
+            )}
+            
           </div>
         </div>
       </div>

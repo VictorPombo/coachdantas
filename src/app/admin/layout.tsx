@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, Dumbbell, PlaySquare, ShoppingBag } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, Dumbbell, PlaySquare, ShoppingBag, Megaphone } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Loja", href: "/admin/loja", icon: ShoppingBag },
     { name: "Agenda", href: "/admin/agenda", icon: CalendarDays },
     { name: "Financeiro", href: "/admin/financeiro", icon: Wallet },
+    { name: "Campanhas", href: "/admin/campanhas", icon: Megaphone },
     { name: "Config", href: "/admin/config", icon: Settings },
   ];
 
