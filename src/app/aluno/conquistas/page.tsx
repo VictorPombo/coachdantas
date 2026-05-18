@@ -3,12 +3,12 @@ import Image from "next/image";
 
 export default function AlunoConquistas() {
   const badges = [
-    { id: 1, imgSrc: "/medals/surf_suor.png", nome: "1º Suor", desc: "Completar a primeira aula", unlocked: true, glow: "from-green-500/40 via-transparent to-transparent", shadow: "shadow-green-500/20", textColor: "text-green-400" },
-    { id: 2, imgSrc: "/medals/surf_fogo.png", nome: "Esquentando", desc: "5 treinos seguidos", unlocked: true, glow: "from-orange-500/40 via-transparent to-transparent", shadow: "shadow-orange-500/20", textColor: "text-orange-400" },
-    { id: 3, imgSrc: "/medals/surf_raio.png", nome: "Imparável", desc: "10 treinos seguidos", unlocked: true, glow: "from-yellow-400/40 via-transparent to-transparent", shadow: "shadow-yellow-400/20", textColor: "text-yellow-400" },
-    { id: 4, imgSrc: "/medals/surf_vulcao.png", nome: "Vulcânico", desc: "20 treinos seguidos", unlocked: false, glow: "from-red-500/40 via-transparent to-transparent", shadow: "shadow-red-500/20", textColor: "text-red-400", progress: "12/20", pct: "60%" },
-    { id: 5, imgSrc: "/medals/surf_alvo.png", nome: "Meta Batida", desc: "Atingir peso objetivo", unlocked: false, glow: "from-blue-500/40 via-transparent to-transparent", shadow: "shadow-blue-500/20", textColor: "text-blue-400" },
-    { id: 6, imgSrc: "/medals/surf_estrela.png", nome: "5 Estrelas", desc: "Score máximo na avaliação", unlocked: false, glow: "from-purple-500/40 via-transparent to-transparent", shadow: "shadow-purple-500/20", textColor: "text-purple-400" },
+    { id: 1, imgSrc: "/medals/coach_surf_suor.png", nome: "1º Suor", desc: "Completar a primeira aula", unlocked: true, glow: "from-green-500/40 via-transparent to-transparent", shadow: "shadow-green-500/20", textColor: "text-green-400" },
+    { id: 2, imgSrc: "/medals/coach_surf_fogo.png", nome: "Esquentando", desc: "5 treinos seguidos", unlocked: true, glow: "from-orange-500/40 via-transparent to-transparent", shadow: "shadow-orange-500/20", textColor: "text-orange-400" },
+    { id: 3, imgSrc: "/medals/coach_surf_raio.png", nome: "Imparável", desc: "10 treinos seguidos", unlocked: true, glow: "from-yellow-400/40 via-transparent to-transparent", shadow: "shadow-yellow-400/20", textColor: "text-yellow-400" },
+    { id: 4, imgSrc: "/medals/coach_surf_vulcao.png", nome: "Vulcânico", desc: "20 treinos seguidos", unlocked: false, glow: "from-red-500/40 via-transparent to-transparent", shadow: "shadow-red-500/20", textColor: "text-red-400", progress: "12/20", pct: "60%" },
+    { id: 5, imgSrc: "/medals/coach_surf_alvo.png", nome: "Meta Batida", desc: "Atingir peso objetivo", unlocked: false, glow: "from-blue-500/40 via-transparent to-transparent", shadow: "shadow-blue-500/20", textColor: "text-blue-400" },
+    { id: 6, imgSrc: "/medals/coach_surf_estrela.png", nome: "5 Estrelas", desc: "Score máximo na avaliação", unlocked: false, glow: "from-purple-500/40 via-transparent to-transparent", shadow: "shadow-purple-500/20", textColor: "text-purple-400" },
   ];
 
   return (

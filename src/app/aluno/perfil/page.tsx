@@ -1,4 +1,5 @@
 import { Settings, CreditCard, Clock, Bell, Share2 } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { hasEnrollment } from "@/face-auth-core/database/queries";
 import { FaceAuthSection } from "./FaceAuthSection";
@@ -79,13 +80,13 @@ export default async function AlunoPerfil() {
       <div className="space-y-2">
         <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-4 px-2">Ajustes da Conta</h3>
         
-        <button className="w-full bg-brand-support border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors text-left">
+        <Link href="/aluno/perfil/editar" className="w-full bg-brand-support border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors text-left">
           <div className="flex items-center gap-3">
             <Settings className="w-5 h-5 text-gray-400" />
             <span className="font-medium">Editar Dados Pessoais</span>
           </div>
           <span className="text-gray-500">→</span>
-        </button>
+        </Link>
 
         <button className="w-full bg-brand-support border border-white/5 p-4 rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors text-left">
           <div className="flex items-center gap-3">
