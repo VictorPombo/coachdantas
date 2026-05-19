@@ -63,15 +63,8 @@ export function Pricing() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-[380px] bg-brand-primary rounded-3xl p-8 border ${
-                plan.popular ? "border-brand-accent scale-105 z-10 shadow-[0_0_20px_rgba(234,179,8,0.15)]" : "border-white/10"
-              }`}
+              className="relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] max-w-[380px] bg-brand-primary rounded-3xl p-8 border border-white/10"
             >
-              {plan.popular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-accent text-white px-4 py-1 rounded-full text-sm font-bold tracking-wider">
-                  MAIS POPULAR
-                </div>
-              )}
               <div className="mb-8">
                 <h3 className="text-xl font-bold text-gray-300 mb-2">{plan.freq}</h3>
                 <div className="flex items-baseline gap-2">
@@ -102,11 +95,7 @@ export function Pricing() {
                 href={`https://wa.me/5511967630066?text=Oi%20Coach%20Dantas!%20Tenho%20interesse%20no%20plano%20de%20${plan.freq}%20na%20${activeTab}.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`block w-full py-4 text-center rounded-xl font-bold transition-all ${
-                  plan.popular
-                    ? "bg-brand-accent hover:bg-brand-accent-hover text-white"
-                    : "bg-white/5 hover:bg-white/10 text-white"
-                }`}
+                className="block w-full py-4 text-center rounded-xl font-bold transition-all bg-white/5 hover:bg-white/10 text-white"
               >
                 QUERO ESSE PLANO
               </Link>
