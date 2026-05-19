@@ -46,25 +46,27 @@ export default function Login() {
             {/* Método de Login Toggle */}
             <div className="flex bg-brand-primary p-1 rounded-xl mb-6">
               <button
+                type="button"
                 onClick={() => setLoginMethod("password")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 cursor-pointer text-sm font-medium rounded-lg transition-all ${
                   loginMethod === "password" 
                     ? "bg-brand-support text-white shadow" 
                     : "text-gray-500 hover:text-white"
                 }`}
               >
-                <KeyRound className="w-4 h-4" />
+                <KeyRound className="w-4 h-4 pointer-events-none" />
                 Senha
               </button>
               <button
+                type="button"
                 onClick={() => setLoginMethod("facial")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 cursor-pointer text-sm font-medium rounded-lg transition-all ${
                   loginMethod === "facial" 
                     ? "bg-brand-support text-white shadow" 
                     : "text-gray-500 hover:text-white"
                 }`}
               >
-                <ScanFace className="w-4 h-4" />
+                <ScanFace className="w-4 h-4 pointer-events-none" />
                 Facial
               </button>
             </div>

@@ -1,5 +1,4 @@
-import * as faceapi from '@vladmandic/face-api'
-
+let faceapi: any = null;
 let modelsLoaded = false
 
 /**
@@ -7,6 +6,10 @@ let modelsLoaded = false
  */
 export async function loadModels() {
   if (modelsLoaded) return
+
+  if (!faceapi) {
+    faceapi = await import('@vladmandic/face-api');
+  }
 
   const modelPath = process.env.NEXT_PUBLIC_FACE_MODEL_CDN || 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'
   
@@ -29,7 +32,7 @@ export async function loadModels() {
 export async function extractEmbedding(
   image: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
 ): Promise<Float32Array | null> {
-  if (!modelsLoaded) {
+  if (!modelsLoaded || !faceapi) {
     await loadModels()
   }
 
