@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   if (role && role !== "admin") {
-    navItems = navItems.filter((item) => item.name !== "Financeiro");
+    navItems = navItems.filter((item) => !["Financeiro", "Loja", "Campanhas"].includes(item.name));
   }
 
   return (
