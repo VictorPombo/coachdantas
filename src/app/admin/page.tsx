@@ -184,7 +184,6 @@ export default async function AdminDashboard() {
                   Ver Inadimplentes
                 </Link>
               </div>
-            )}
 
             {/* Inativos */}
             <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
