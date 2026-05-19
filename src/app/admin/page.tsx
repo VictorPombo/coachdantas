@@ -98,7 +98,7 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Aulas do dia */}
-        <div className="lg:col-span-2 bg-brand-support rounded-3xl border border-white/5 p-6">
+        <div className={`${isAdmin ? "lg:col-span-2" : "lg:col-span-3"} bg-brand-support rounded-3xl border border-white/5 p-6`}>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">Aulas de Hoje</h2>
             <Link
@@ -149,14 +149,14 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Alertas */}
-        <div className="bg-brand-support rounded-3xl border border-white/5 p-6">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-brand-accent" />
-            Atenção
-          </h2>
-          <div className="space-y-4">
-            {/* Inadimplentes (Only Admin) */}
-            {isAdmin && (
+        {isAdmin && (
+          <div className="bg-brand-support rounded-3xl border border-white/5 p-6">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-brand-accent" />
+              Atenção
+            </h2>
+            <div className="space-y-4">
+              {/* Inadimplentes (Only Admin) */}
               <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                 <h3 className="font-bold text-red-400 text-sm mb-1">
                   Atrasados ({stats.pastDueCount})
@@ -199,9 +199,10 @@ export default async function AdminDashboard() {
               <button className="w-full py-2 bg-yellow-500/20 text-yellow-400 text-sm font-bold rounded-lg hover:bg-yellow-500/30 transition-colors">
                 Chamar no WhatsApp
               </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
