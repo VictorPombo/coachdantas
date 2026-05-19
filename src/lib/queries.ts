@@ -282,3 +282,20 @@ export async function markCampaignSent(campaignId: string, leadId: string) {
   });
   if (error) throw new Error(error.message);
 }
+
+// -------------------------------------------------------
+// Anotações (Treino do Dia)
+// -------------------------------------------------------
+
+export async function getNoteForDate(dateString: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("admin_notes")
+    .select("title, content")
+    .eq("target_date", dateString)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  return data;
+}

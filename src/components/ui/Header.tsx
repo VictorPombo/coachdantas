@@ -8,13 +8,18 @@ export function Header() {
         <Link href="/" className="font-bold text-xl tracking-tighter">
           COACH<span className="text-brand-accent">DANTAS</span>
         </Link>
-        <Link 
-          href="/login"
-          className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm font-medium border border-white/10"
-        >
-          <UserCircle className="w-4 h-4" />
-          Área do Aluno
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/#blog" className="text-sm font-medium text-gray-300 hover:text-white hidden md:block transition-colors">
+            Blog & Dicas
+          </Link>
+          <Link 
+            href="/login"
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm font-medium border border-white/10"
+          >
+            <UserCircle className="w-4 h-4" />
+            Área do Aluno
+          </Link>
+        </div>
       </div>
     </header>
   );

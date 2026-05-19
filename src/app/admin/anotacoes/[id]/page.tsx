@@ -22,6 +22,7 @@ export default async function NotePage({ params }: PageProps) {
       initialTitle={note.title || ""}
       initialContent={note.content || ""} 
       updatedAt={note.updated_at} 
+      initialTargetDate={note.target_date || null}
     />
   );
 }

@@ -4,6 +4,7 @@ import { TargetAudience } from "@/components/sections/TargetAudience";
 import { Pricing } from "@/components/sections/Pricing";
 import { About } from "@/components/sections/About";
 import { Location } from "@/components/sections/Location";
+import { Blog } from "@/components/sections/Blog";
 import { Contact } from "@/components/sections/Contact";
 import { CTAStrip } from "@/components/sections/CTAStrip";
 import { Footer } from "@/components/sections/Footer";
@@ -18,6 +19,7 @@ export default function Home() {
       <Pricing />
       <About />
       <Location />
+      <Blog />
       <Contact />
       <CTAStrip />
       <Footer />

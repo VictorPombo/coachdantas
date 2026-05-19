@@ -11,11 +11,13 @@ interface NoteEditorProps {
   initialTitle: string;
   initialContent: string;
   updatedAt: string;
+  initialTargetDate?: string | null;
 }
 
-export default function NoteEditor({ id, initialTitle, initialContent, updatedAt }: NoteEditorProps) {
+export default function NoteEditor({ id, initialTitle, initialContent, updatedAt, initialTargetDate }: NoteEditorProps) {
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
+  const [targetDate, setTargetDate] = useState(initialTargetDate || "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -39,12 +41,12 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
 
   // Debounce save
   useEffect(() => {
-    if (content === initialContent && title === initialTitle) return;
+    if (content === initialContent && title === initialTitle && targetDate === (initialTargetDate || "")) return;
     
     setSaveStatus("saving");
     const timeoutId = setTimeout(async () => {
       try {
-        await updateNote(id, title, content);
+        await updateNote(id, title, content, targetDate || null);
         setSaveStatus("saved");
         
         // Hide "saved" after a few seconds
@@ -57,7 +59,7 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(timeoutId);
-  }, [content, title, id, initialContent, initialTitle]);
+  }, [content, title, targetDate, id, initialContent, initialTitle, initialTargetDate]);
 
   const handleDelete = async () => {
     if (window.confirm("Tem certeza que deseja excluir esta anotação?")) {
@@ -122,9 +124,23 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
         </div>
       </div>
       
-      {/* Meta Date */}
-      <div className="text-center py-4">
-        <span className="text-xs text-gray-500 font-medium">{dateString}</span>
+      {/* Meta Date and Target Date Picker */}
+      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+        <span className="text-xs text-gray-500 font-medium mb-2 sm:mb-0">
+          Última edição: {dateString}
+        </span>
+        <div className="flex items-center gap-2">
+          <label htmlFor="targetDate" className="text-sm text-gray-400 font-medium">
+            Vincular à Agenda:
+          </label>
+          <input
+            id="targetDate"
+            type="date"
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+            className="bg-brand-primary text-white text-sm border border-white/10 rounded-lg px-3 py-1.5 outline-none focus:border-brand-accent transition-colors"
+          />
+        </div>
       </div>
 
       {/* Editor Area */}

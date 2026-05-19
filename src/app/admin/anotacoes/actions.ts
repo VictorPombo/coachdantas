@@ -74,7 +74,7 @@ export async function createNote() {
   redirect(`/admin/anotacoes/${data.id}`);
 }
 
-export async function updateNote(id: string, title: string, content: string) {
+export async function updateNote(id: string, title: string, content: string, target_date?: string | null) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -84,7 +84,12 @@ export async function updateNote(id: string, title: string, content: string) {
 
   const { error } = await supabase
     .from("admin_notes")
-    .update({ title, content, updated_at: new Date().toISOString() })
+    .update({ 
+      title, 
+      content, 
+      target_date: target_date || null,
+      updated_at: new Date().toISOString() 
+    })
     .eq("id", id)
     .eq("user_id", user.id);
 

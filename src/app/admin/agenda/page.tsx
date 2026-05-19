@@ -1,6 +1,9 @@
-import { CalendarDays, Clock, Plus, Users } from "lucide-react";
+import { CalendarDays, Clock, Plus, Users, StickyNote } from "lucide-react";
+import { getNoteForDate } from "@/lib/queries";
 
-export default function AdminAgenda() {
+export default async function AdminAgenda() {
+  const todayISO = new Date().toISOString().split('T')[0];
+  const treinoDoDia = await getNoteForDate(todayISO);
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -44,6 +47,23 @@ export default function AdminAgenda() {
               </div>
             </div>
           </div>
+
+          {treinoDoDia && (
+            <div className="bg-brand-support/80 border border-brand-accent/30 rounded-2xl p-5 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-brand-accent/20 rounded-lg">
+                  <StickyNote className="w-5 h-5 text-brand-accent" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Treino do Dia</h3>
+              </div>
+              <div className="bg-brand-primary/50 p-4 rounded-xl border border-white/5">
+                {treinoDoDia.title && <h4 className="font-bold text-brand-neon mb-2">{treinoDoDia.title}</h4>}
+                <div className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
+                  {treinoDoDia.content}
+                </div>
+              </div>
+            </div>
+          )}
 
           {[
             { hora: "06:00", fim: "07:00", local: "Tatame", alunos: ["Victor Assis", "João", "Maria"], limite: 6, modalidade: "Funcional Inteligente" },
