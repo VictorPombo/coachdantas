@@ -5,6 +5,7 @@ import {
   getTodayClasses,
   getPastDueStudents,
 } from "@/lib/queries";
+import { createClient } from "@/utils/supabase/server";
 
 function formatCurrency(value: number) {
   if (value >= 1000) {
@@ -19,6 +20,23 @@ export default async function AdminDashboard() {
     getTodayClasses(),
     getPastDueStudents(),
   ]);
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let role = "professor"; // Default fallback
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile) {
+      role = profile.role;
+    }
+  }
+
+  const isAdmin = role === "admin";
 
   return (
     <div className="space-y-8">
@@ -49,29 +67,33 @@ export default async function AdminDashboard() {
           <div className="text-sm text-gray-400">Aulas hoje</div>
         </div>
 
-        <div className="bg-brand-support p-6 rounded-2xl border border-white/5">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-brand-primary rounded-lg border border-white/5">
-              <TrendingUp className="w-5 h-5 text-green-400" />
+        {isAdmin && (
+          <div className="bg-brand-support p-6 rounded-2xl border border-white/5">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-2 bg-brand-primary rounded-lg border border-white/5">
+                <TrendingUp className="w-5 h-5 text-green-400" />
+              </div>
             </div>
+            <div className="text-3xl font-bold mb-1">
+              {formatCurrency(stats.monthlyRevenue)}
+            </div>
+            <div className="text-sm text-gray-400">Faturamento no mês</div>
           </div>
-          <div className="text-3xl font-bold mb-1">
-            {formatCurrency(stats.monthlyRevenue)}
-          </div>
-          <div className="text-sm text-gray-400">Faturamento no mês</div>
-        </div>
+        )}
 
-        <div className="bg-brand-support p-6 rounded-2xl border border-red-500/20 bg-red-500/5">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-red-500/10 rounded-lg border border-red-500/20">
-              <DollarSign className="w-5 h-5 text-red-400" />
+        {isAdmin && (
+          <div className="bg-brand-support p-6 rounded-2xl border border-red-500/20 bg-red-500/5">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                <DollarSign className="w-5 h-5 text-red-400" />
+              </div>
             </div>
+            <div className="text-3xl font-bold text-red-400 mb-1">
+              {stats.pastDueCount}
+            </div>
+            <div className="text-sm text-gray-400">Pagamentos pendentes</div>
           </div>
-          <div className="text-3xl font-bold text-red-400 mb-1">
-            {stats.pastDueCount}
-          </div>
-          <div className="text-sm text-gray-400">Pagamentos pendentes</div>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -133,34 +155,36 @@ export default async function AdminDashboard() {
             Atenção
           </h2>
           <div className="space-y-4">
-            {/* Inadimplentes */}
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-              <h3 className="font-bold text-red-400 text-sm mb-1">
-                Atrasados ({stats.pastDueCount})
-              </h3>
-              {stats.pastDueCount > 0 ? (
-                <>
-                  <p className="text-sm text-gray-400 mb-3">
-                    {formatCurrency(stats.pastDueAmount)} pendentes
-                  </p>
-                  <ul className="mb-3 space-y-1">
-                    {pastDueStudents.slice(0, 3).map((s) => (
-                      <li key={s.id} className="text-xs text-gray-300 truncate">
-                        • {s.name} — {s.plan}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p className="text-sm text-gray-400 mb-3">Nenhum em atraso 🎉</p>
-              )}
-              <Link
-                href="/admin/financeiro"
-                className="w-full py-2 bg-red-500/20 text-red-400 text-sm font-bold rounded-lg hover:bg-red-500/30 transition-colors block text-center"
-              >
-                Ver Inadimplentes
-              </Link>
-            </div>
+            {/* Inadimplentes (Only Admin) */}
+            {isAdmin && (
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <h3 className="font-bold text-red-400 text-sm mb-1">
+                  Atrasados ({stats.pastDueCount})
+                </h3>
+                {stats.pastDueCount > 0 ? (
+                  <>
+                    <p className="text-sm text-gray-400 mb-3">
+                      {formatCurrency(stats.pastDueAmount)} pendentes
+                    </p>
+                    <ul className="mb-3 space-y-1">
+                      {pastDueStudents.slice(0, 3).map((s) => (
+                        <li key={s.id} className="text-xs text-gray-300 truncate">
+                          • {s.name} — {s.plan}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-400 mb-3">Nenhum em atraso 🎉</p>
+                )}
+                <Link
+                  href="/admin/financeiro"
+                  className="w-full py-2 bg-red-500/20 text-red-400 text-sm font-bold rounded-lg hover:bg-red-500/30 transition-colors block text-center"
+                >
+                  Ver Inadimplentes
+                </Link>
+              </div>
+            )}
 
             {/* Inativos */}
             <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
