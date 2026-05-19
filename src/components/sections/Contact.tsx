@@ -18,7 +18,7 @@ export function Contact() {
             </p>
 
             <Link
-              href="https://wa.me/551275006875?text=Oi%20Coach%20Dantas!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o%20gratuita."
+              href="https://wa.me/5511967630066?text=Oi%20Coach%20Dantas!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o%20gratuita."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex py-4 px-10 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary rounded-xl font-bold text-lg transition-all duration-300 items-center justify-center gap-2"

@@ -52,6 +52,13 @@ export async function updateSession(request: NextRequest) {
 
     const role = profile?.role;
 
+    // Professor trying to access /admin/financeiro → redirect to /admin
+    if (role === "professor" && pathname.startsWith("/admin/financeiro")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
+
     // Student trying to access /admin → redirect to /aluno
     if (role === "student" && pathname.startsWith("/admin")) {
       const url = request.nextUrl.clone();
@@ -59,8 +66,8 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Admin trying to access /aluno → redirect to /admin
-    if (role === "admin" && pathname.startsWith("/aluno")) {
+    // Admin or Professor trying to access /aluno → redirect to /admin
+    if ((role === "admin" || role === "professor") && pathname.startsWith("/aluno")) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin";
       return NextResponse.redirect(url);

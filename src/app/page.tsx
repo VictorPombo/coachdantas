@@ -1,15 +1,12 @@
 import { Hero } from "@/components/sections/Hero";
-import { Stats } from "@/components/sections/Stats";
-import { Modalities } from "@/components/sections/Modalities";
-import { HowItWorks } from "@/components/sections/HowItWorks";
-import { Athletes } from "@/components/sections/Athletes";
+import { LogoBanner } from "@/components/sections/LogoBanner";
+import { TargetAudience } from "@/components/sections/TargetAudience";
 import { Pricing } from "@/components/sections/Pricing";
 import { About } from "@/components/sections/About";
-import { Blog } from "@/components/sections/Blog";
 import { Location } from "@/components/sections/Location";
 import { Contact } from "@/components/sections/Contact";
+import { CTAStrip } from "@/components/sections/CTAStrip";
 import { Footer } from "@/components/sections/Footer";
-
 import { Header } from "@/components/ui/Header";
 
 export default function Home() {
@@ -17,15 +14,12 @@ export default function Home() {
     <main>
       <Header />
       <Hero />
-      <Stats />
-      <Modalities />
-      <HowItWorks />
-      <Athletes />
+      <TargetAudience />
       <Pricing />
       <About />
-      <Blog />
       <Location />
       <Contact />
+      <CTAStrip />
       <Footer />
     </main>
   );

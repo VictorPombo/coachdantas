@@ -120,8 +120,16 @@ export async function POST(request: Request) {
 
     if (otpError) throw otpError
 
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single()
+
+    const role = profile?.role || 'aluno'
+
     // Retorna sucesso para o Frontend redirecionar
-    return NextResponse.json({ success: true, email })
+    return NextResponse.json({ success: true, email, role })
   } catch (error: any) {
     console.error('[FaceAuth API - Login]', error)
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 })

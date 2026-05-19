@@ -7,7 +7,7 @@ import Link from "next/link";
 const plansTatame = [
   { freq: "1x por semana", month: 275, hour: 68.75 },
   { freq: "2x por semana", month: 420, hour: 52.5 },
-  { freq: "3x por semana", month: 516, hour: 43.0, popular: true },
+  { freq: "3x por semana", month: 516, hour: 43.0 },
   { freq: "4x por semana", month: 576, hour: 36.0 },
   { freq: "5x por semana", month: 610, hour: 30.5 },
 ];
@@ -15,7 +15,7 @@ const plansTatame = [
 const plansPiscina = [
   { freq: "1x por semana", month: 210, hour: 52.5 },
   { freq: "2x por semana", month: 300, hour: 37.5 },
-  { freq: "3x por semana", month: 380, hour: 31.66, popular: true },
+  { freq: "3x por semana", month: 380, hour: 31.66 },
 ];
 
 export function Pricing() {
@@ -99,7 +99,7 @@ export function Pricing() {
               </ul>
 
               <Link
-                href={`https://wa.me/551275006875?text=Oi%20Coach%20Dantas!%20Tenho%20interesse%20no%20plano%20de%20${plan.freq}%20na%20${activeTab}.`}
+                href={`https://wa.me/5511967630066?text=Oi%20Coach%20Dantas!%20Tenho%20interesse%20no%20plano%20de%20${plan.freq}%20na%20${activeTab}.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`block w-full py-4 text-center rounded-xl font-bold transition-all ${

@@ -2,23 +2,48 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, Dumbbell, PlaySquare, ShoppingBag, Megaphone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, Dumbbell, PlaySquare, ShoppingBag, Megaphone, StickyNote, Target } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [role, setRole] = useState<string | null>(null);
 
-  const navItems = [
+  useEffect(() => {
+    async function fetchRole() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        if (data) setRole(data.role);
+      }
+    }
+    fetchRole();
+  }, []);
+
+  let navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Alunos", href: "/admin/alunos", icon: Users },
+    { name: "TotalPass CRM", href: "/admin/totalpass", icon: Target },
     { name: "Treinos", href: "/admin/treinos", icon: Dumbbell },
     { name: "Biblioteca", href: "/admin/biblioteca", icon: PlaySquare },
     { name: "Loja", href: "/admin/loja", icon: ShoppingBag },
     { name: "Agenda", href: "/admin/agenda", icon: CalendarDays },
     { name: "Financeiro", href: "/admin/financeiro", icon: Wallet },
     { name: "Campanhas", href: "/admin/campanhas", icon: Megaphone },
+    { name: "Anotações", href: "/admin/anotacoes", icon: StickyNote },
     { name: "Config", href: "/admin/config", icon: Settings },
   ];
+
+  if (role && role !== "admin") {
+    navItems = navItems.filter((item) => item.name !== "Financeiro");
+  }
 
   return (
     <div className="min-h-screen bg-brand-primary flex flex-col md:flex-row font-sans">

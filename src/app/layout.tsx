@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${outfit.variable} antialiased`}
+      className={`${inter.variable} ${outfit.variable} antialiased scroll-smooth scroll-pt-24`}
     >
       <body className="min-h-screen bg-brand-primary text-brand-secondary flex flex-col font-sans">
         {children}

@@ -65,8 +65,15 @@ export function FaceLoginForm() {
         throw new Error(errData.error || "Falha na validação facial")
       }
 
+      // Parse successful response
+      const data = await res.json()
+
       // Sucesso! A sessão foi criada via cookie pelo backend.
-      router.push('/aluno')
+      if (data.role === 'admin' || data.role === 'professor') {
+        router.push('/admin')
+      } else {
+        router.push('/aluno')
+      }
       router.refresh()
     } catch (err: any) {
       setErrorMsg(err.message)

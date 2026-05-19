@@ -7,11 +7,9 @@ export function About() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative aspect-[4/5] rounded-3xl overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-t from-brand-primary via-transparent to-transparent z-10"></div>
-            <img
-              src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop"
-              alt="Coach Dantas"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
+            <div className="w-full h-full bg-[#0a0a0a] border-2 border-dashed border-white/20 flex items-center justify-center group-hover:border-brand-accent/50 transition-colors duration-700">
+              <span className="text-white/30 font-bold tracking-widest uppercase">Adicionar Foto</span>
+            </div>
             <div className="absolute bottom-8 left-8 right-8 z-20">
               <div className="bg-brand-support/80 backdrop-blur-md border border-white/10 p-6 rounded-2xl">
                 <h3 className="text-2xl font-bold text-white mb-1">Leandro Dantas</h3>

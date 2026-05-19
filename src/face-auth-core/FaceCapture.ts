@@ -77,7 +77,7 @@ export function calculateAverageBrightness(canvas: HTMLCanvasElement): number {
  */
 export async function startCamera(): Promise<HTMLVideoElement> {
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { width: 640, height: 480, facingMode: 'user' }
+    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
   })
   
   const video = document.createElement('video')

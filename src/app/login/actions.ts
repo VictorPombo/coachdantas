@@ -32,7 +32,7 @@ export async function login(formData: FormData) {
       .eq("id", data.user.id)
       .single();
 
-    if (profile?.role === "admin") {
+    if (profile?.role === "admin" || profile?.role === "professor") {
       redirect("/admin");
     } else {
       redirect("/aluno");
