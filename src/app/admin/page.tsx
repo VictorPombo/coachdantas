@@ -41,57 +41,82 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Visão Geral</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">Visão Geral</h1>
         <p className="text-gray-400">Aqui está o resumo do seu negócio hoje.</p>
       </div>
 
       {/* Resumo Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-brand-support p-6 rounded-2xl border border-white/5">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-brand-primary rounded-lg border border-white/5">
+      <div className={`grid gap-6 ${isAdmin ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-2"}`}>
+        {/* Alunos Ativos Card */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-support/50 to-brand-support/10 p-6 rounded-2xl border border-white/5 shadow-lg hover:scale-[1.02] hover:border-brand-neon/30 hover:shadow-brand-neon/5 transition-all duration-300 group">
+          <div className="absolute -right-10 -top-10 w-24 h-24 bg-brand-neon/5 rounded-full blur-2xl group-hover:bg-brand-neon/10 transition-all duration-300" />
+          
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm font-semibold tracking-wider text-gray-400 uppercase">Alunos Ativos</span>
+            <div className="p-3 bg-brand-neon/10 rounded-xl border border-brand-neon/20 shadow-inner group-hover:scale-110 transition-all duration-300">
               <Users className="w-5 h-5 text-brand-neon" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{stats.activeStudents}</div>
-          <div className="text-sm text-gray-400">Alunos ativos</div>
+          <div className="text-4xl font-extrabold tracking-tight text-white mb-2 group-hover:text-brand-neon transition-colors">
+            {stats.activeStudents}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-brand-neon/80">
+            <span className="inline-block w-2 h-2 rounded-full bg-brand-neon animate-pulse" />
+            Em atividade contínua
+          </div>
         </div>
 
-        <div className="bg-brand-support p-6 rounded-2xl border border-white/5">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-brand-primary rounded-lg border border-white/5">
+        {/* Aulas Hoje Card */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-support/50 to-brand-support/10 p-6 rounded-2xl border border-white/5 shadow-lg hover:scale-[1.02] hover:border-brand-accent/30 hover:shadow-brand-accent/5 transition-all duration-300 group">
+          <div className="absolute -right-10 -top-10 w-24 h-24 bg-brand-accent/5 rounded-full blur-2xl group-hover:bg-brand-accent/10 transition-all duration-300" />
+
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm font-semibold tracking-wider text-gray-400 uppercase">Aulas Hoje</span>
+            <div className="p-3 bg-brand-accent/10 rounded-xl border border-brand-accent/20 shadow-inner group-hover:scale-110 transition-all duration-300">
               <Dumbbell className="w-5 h-5 text-brand-accent" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{todayClasses.length}</div>
-          <div className="text-sm text-gray-400">Aulas hoje</div>
+          <div className="text-4xl font-extrabold tracking-tight text-white mb-2 group-hover:text-brand-accent transition-colors">
+            {todayClasses.length}
+          </div>
+          <div className="text-xs text-gray-400">
+            {todayClasses.length > 0 ? "Aulas programadas para o dia" : "Nenhuma aula para hoje"}
+          </div>
         </div>
 
+        {/* Faturamento Card (Only Admin) */}
         {isAdmin && (
-          <div className="bg-brand-support p-6 rounded-2xl border border-white/5">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-brand-primary rounded-lg border border-white/5">
+          <div className="relative overflow-hidden bg-gradient-to-br from-brand-support/50 to-brand-support/10 p-6 rounded-2xl border border-white/5 shadow-lg hover:scale-[1.02] hover:border-green-400/30 hover:shadow-green-400/5 transition-all duration-300 group">
+            <div className="absolute -right-10 -top-10 w-24 h-24 bg-green-400/5 rounded-full blur-2xl group-hover:bg-green-400/10 transition-all duration-300" />
+
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm font-semibold tracking-wider text-gray-400 uppercase">Faturamento</span>
+              <div className="p-3 bg-green-400/10 rounded-xl border border-green-400/20 shadow-inner group-hover:scale-110 transition-all duration-300">
                 <TrendingUp className="w-5 h-5 text-green-400" />
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">
+            <div className="text-4xl font-extrabold tracking-tight text-white mb-2 group-hover:text-green-400 transition-colors">
               {formatCurrency(stats.monthlyRevenue)}
             </div>
-            <div className="text-sm text-gray-400">Faturamento no mês</div>
+            <div className="text-xs text-gray-400">Faturamento no mês atual</div>
           </div>
         )}
 
+        {/* Pagamentos Pendentes Card (Only Admin) */}
         {isAdmin && (
-          <div className="bg-brand-support p-6 rounded-2xl border border-red-500/20 bg-red-500/5">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+          <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 to-brand-support/10 p-6 rounded-2xl border border-red-500/20 shadow-lg hover:scale-[1.02] hover:border-red-500/40 hover:shadow-red-500/5 transition-all duration-300 group">
+            <div className="absolute -right-10 -top-10 w-24 h-24 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition-all duration-300" />
+
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm font-semibold tracking-wider text-gray-400 uppercase">Atenção</span>
+              <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20 shadow-inner group-hover:scale-110 transition-all duration-300">
                 <DollarSign className="w-5 h-5 text-red-400" />
               </div>
             </div>
-            <div className="text-3xl font-bold text-red-400 mb-1">
+            <div className="text-4xl font-extrabold tracking-tight text-red-400 mb-2 group-hover:scale-105 transition-transform">
               {stats.pastDueCount}
             </div>
-            <div className="text-sm text-gray-400">Pagamentos pendentes</div>
+            <div className="text-xs text-red-400/80">Pagamentos pendentes</div>
           </div>
         )}
       </div>
