@@ -5,23 +5,20 @@ import { createClient } from "@/utils/supabase/server";
 
 export default async function AnotacoesPage() {
   const notes = await getNotes();
-
+  
+  // Get user role to handle permissions on UI
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
-  let role = "professor"; // Default fallback
+  let isAdmin = false;
+
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
-    if (profile) {
-      role = profile.role;
-    }
+    isAdmin = profile?.role === "admin";
   }
-
-  const isAdmin = role === "admin";
 
   // Função para formatar a data como no celular
   const formatDate = (dateString: string) => {

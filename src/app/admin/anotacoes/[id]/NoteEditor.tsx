@@ -13,12 +13,13 @@ interface NoteEditorProps {
   updatedAt: string;
   initialTargetDate?: string | null;
   isAdmin?: boolean;
+  from?: string;
 }
 
-export default function NoteEditor({ id, initialTitle, initialContent, updatedAt, initialTargetDate, isAdmin = true }: NoteEditorProps) {
+export default function NoteEditor({ id, initialTitle, initialContent, updatedAt, initialTargetDate, isAdmin = false, from = "" }: NoteEditorProps) {
+  const backPath = from === "agenda" ? "/admin/agenda" : "/admin/anotacoes";
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [targetDate, setTargetDate] = useState(initialTargetDate || "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -35,20 +36,20 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
 
   // Focus on mount if empty
   useEffect(() => {
-    if (!initialContent && textareaRef.current) {
+    if (isAdmin && !initialContent && textareaRef.current) {
       textareaRef.current.focus();
     }
-  }, [initialContent]);
+  }, [initialContent, isAdmin]);
 
   // Debounce save
   useEffect(() => {
-    if (!isAdmin) return; // Don't autosave if read-only (professor)
-    if (content === initialContent && title === initialTitle && targetDate === (initialTargetDate || "")) return;
+    if (!isAdmin) return; // Do not save if user is not an admin
+    if (content === initialContent && title === initialTitle) return;
     
     setSaveStatus("saving");
     const timeoutId = setTimeout(async () => {
       try {
-        await updateNote(id, title, content, targetDate || null);
+        await updateNote(id, title, content);
         setSaveStatus("saved");
         
         // Hide "saved" after a few seconds
@@ -61,15 +62,20 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(timeoutId);
-  }, [content, title, targetDate, id, initialContent, initialTitle, initialTargetDate, isAdmin]);
+  }, [content, title, id, initialContent, initialTitle, isAdmin]);
 
   const handleDelete = async () => {
+    if (!isAdmin) return;
     if (window.confirm("Tem certeza que deseja excluir esta anotação?")) {
       setIsDeleting(true);
       try {
-        await deleteNote(id);
-        // deleteNote redirects, but just in case:
-        router.push("/admin/anotacoes");
+        const res = await deleteNote(id);
+        if (res?.success) {
+          router.push(backPath);
+        } else {
+          setIsDeleting(false);
+          alert("Erro ao excluir anotação");
+        }
       } catch (e) {
         setIsDeleting(false);
         alert("Erro ao excluir anotação");
@@ -90,11 +96,11 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
       {/* Header Toolbar */}
       <div className="flex items-center justify-between p-4 border-b border-white/5">
         <Link 
-          href="/admin/anotacoes"
+          href={backPath}
           className="flex items-center text-brand-accent hover:text-white transition-colors py-2 pr-4 font-medium"
         >
           <ChevronLeft className="w-5 h-5 mr-1" />
-          Anotações
+          {from === "agenda" ? "Agenda" : "Anotações"}
         </Link>
         
         <div className="flex items-center gap-4">
@@ -134,24 +140,11 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
         </div>
       </div>
       
-      {/* Meta Date and Target Date Picker */}
-      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
-        <span className="text-xs text-gray-500 font-medium mb-2 sm:mb-0">
+      {/* Meta Date */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+        <span className="text-xs text-gray-500 font-medium">
           Última edição: {dateString}
         </span>
-        <div className="flex items-center gap-2">
-          <label htmlFor="targetDate" className="text-sm text-gray-400 font-medium">
-            Vincular à Agenda:
-          </label>
-          <input
-            id="targetDate"
-            type="date"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            disabled={!isAdmin}
-            className="bg-brand-primary text-white text-sm border border-white/10 rounded-lg px-3 py-1.5 outline-none focus:border-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
       </div>
 
       {/* Editor Area */}
@@ -160,21 +153,21 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          readOnly={!isAdmin}
           placeholder={isAdmin ? "Título" : "Sem título"}
+          readOnly={!isAdmin}
           className="w-full bg-transparent text-white text-3xl font-bold placeholder-gray-600 outline-none"
         />
         <textarea
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          placeholder={isAdmin ? "Comece a digitar..." : "Sem conteúdo..."}
           readOnly={!isAdmin}
-          placeholder={isAdmin ? "Comece a digitar..." : "Nota vazia..."}
           className="w-full bg-transparent text-white text-lg placeholder-gray-600 resize-none outline-none min-h-full flex-1 leading-relaxed"
           spellCheck="false"
         />
       </div>
-      
+
       <style dangerouslySetInnerHTML={{__html: `
         .hide-scrollbar::-webkit-scrollbar {
           display: none;

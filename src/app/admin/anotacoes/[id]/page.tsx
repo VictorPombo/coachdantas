@@ -7,32 +7,34 @@ interface PageProps {
   params: {
     id: string;
   };
+  searchParams: {
+    from?: string;
+  };
 }
 
-export default async function NotePage({ params }: PageProps) {
+export default async function NotePage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const from = resolvedSearchParams?.from || "";
   const note = await getNote(id);
 
-  if (!note) {
+  if (!note || note.target_date !== null) {
     notFound();
   }
 
+  // Get user role to handle permissions on NoteEditor
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
-  let role = "professor"; // Default fallback
+  let isAdmin = false;
+
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
-    if (profile) {
-      role = profile.role;
-    }
+    isAdmin = profile?.role === "admin";
   }
-
-  const isAdmin = role === "admin";
 
   return (
     <NoteEditor 
@@ -42,6 +44,7 @@ export default async function NotePage({ params }: PageProps) {
       updatedAt={note.updated_at} 
       initialTargetDate={note.target_date || null}
       isAdmin={isAdmin}
+      from={from}
     />
   );
 }
