@@ -4,6 +4,19 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+// Helper function to verify if the user is an admin
+async function verifyAdmin(supabase: any, userId: string) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single();
+
+  if (!profile || profile.role !== "admin") {
+    throw new Error("Apenas administradores possuem permissão para realizar esta ação.");
+  }
+}
+
 export async function getNotes() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -55,6 +68,9 @@ export async function createNote() {
     throw new Error("Não autenticado");
   }
 
+  // Verify server-side admin role
+  await verifyAdmin(supabase, user.id);
+
   const { data, error } = await supabase
     .from("admin_notes")
     .insert([{ 
@@ -81,6 +97,9 @@ export async function updateNote(id: string, title: string, content: string, tar
   if (!user) {
     throw new Error("Não autenticado");
   }
+
+  // Verify server-side admin role
+  await verifyAdmin(supabase, user.id);
 
   const { error } = await supabase
     .from("admin_notes")
@@ -109,6 +128,9 @@ export async function deleteNote(id: string) {
   if (!user) {
     throw new Error("Não autenticado");
   }
+
+  // Verify server-side admin role
+  await verifyAdmin(supabase, user.id);
 
   const { error } = await supabase
     .from("admin_notes")

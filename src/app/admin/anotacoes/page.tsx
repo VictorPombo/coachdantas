@@ -1,9 +1,27 @@
 import { getNotes, createNote } from "./actions";
 import Link from "next/link";
-import { Plus, StickyNote, ChevronRight } from "lucide-react";
+import { Plus, StickyNote, ChevronRight, Eye } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function AnotacoesPage() {
   const notes = await getNotes();
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let role = "professor"; // Default fallback
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile) {
+      role = profile.role;
+    }
+  }
+
+  const isAdmin = role === "admin";
 
   // Função para formatar a data como no celular
   const formatDate = (dateString: string) => {
@@ -61,19 +79,30 @@ export default async function AnotacoesPage() {
     <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]">
       <div className="flex items-center justify-between mb-8 px-2">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Anotações</h1>
-          <p className="text-gray-400 text-sm">Suas anotações pessoais, como no celular.</p>
+          <div className="flex items-center gap-2 mb-2">
+            <h1 className="text-3xl font-bold text-white tracking-tight">Anotações</h1>
+            {!isAdmin && (
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-white/10 text-gray-300 rounded-full flex items-center gap-1 border border-white/5">
+                <Eye className="w-2.5 h-2.5" /> Apenas Leitura
+              </span>
+            )}
+          </div>
+          <p className="text-gray-400 text-sm">
+            {isAdmin ? "Suas anotações pessoais, como no celular." : "Anotações e diretrizes compartilhadas pelo administrador."}
+          </p>
         </div>
         
-        <form action={createNote}>
-          <button 
-            type="submit" 
-            className="bg-brand-accent hover:bg-brand-accent-hover text-brand-primary p-3 rounded-full transition-all shadow-lg shadow-brand-accent/20 flex items-center justify-center transform hover:scale-105 active:scale-95"
-            aria-label="Nova anotação"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-        </form>
+        {isAdmin && (
+          <form action={createNote}>
+            <button 
+              type="submit" 
+              className="bg-brand-accent hover:bg-brand-accent-hover text-brand-primary p-3 rounded-full transition-all shadow-lg shadow-brand-accent/20 flex items-center justify-center transform hover:scale-105 active:scale-95"
+              aria-label="Nova anotação"
+            >
+              <Plus className="w-6 h-6" />
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto pb-10 hide-scrollbar">
@@ -84,7 +113,7 @@ export default async function AnotacoesPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Nenhuma anotação</h3>
             <p className="text-gray-400 max-w-sm">
-              Clique no botão + no topo da tela para criar sua primeira nota.
+              {isAdmin ? "Clique no botão + no topo da tela para criar sua primeira nota." : "Nenhuma anotação disponível no momento."}
             </p>
           </div>
         ) : (

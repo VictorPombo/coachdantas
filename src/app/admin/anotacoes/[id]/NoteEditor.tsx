@@ -12,9 +12,10 @@ interface NoteEditorProps {
   initialContent: string;
   updatedAt: string;
   initialTargetDate?: string | null;
+  isAdmin?: boolean;
 }
 
-export default function NoteEditor({ id, initialTitle, initialContent, updatedAt, initialTargetDate }: NoteEditorProps) {
+export default function NoteEditor({ id, initialTitle, initialContent, updatedAt, initialTargetDate, isAdmin = true }: NoteEditorProps) {
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [targetDate, setTargetDate] = useState(initialTargetDate || "");
@@ -41,6 +42,7 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
 
   // Debounce save
   useEffect(() => {
+    if (!isAdmin) return; // Don't autosave if read-only (professor)
     if (content === initialContent && title === initialTitle && targetDate === (initialTargetDate || "")) return;
     
     setSaveStatus("saving");
@@ -59,7 +61,7 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(timeoutId);
-  }, [content, title, targetDate, id, initialContent, initialTitle, initialTargetDate]);
+  }, [content, title, targetDate, id, initialContent, initialTitle, initialTargetDate, isAdmin]);
 
   const handleDelete = async () => {
     if (window.confirm("Tem certeza que deseja excluir esta anotação?")) {
@@ -97,30 +99,38 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
         
         <div className="flex items-center gap-4">
           {/* Status Indicator */}
-          <div className="text-xs font-medium flex items-center justify-center min-w-[80px]">
-            {saveStatus === "saving" && (
-              <span className="flex items-center text-gray-400">
-                <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Salvando...
-              </span>
-            )}
-            {saveStatus === "saved" && (
-              <span className="flex items-center text-green-500">
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Salvo
-              </span>
-            )}
-            {saveStatus === "error" && (
-              <span className="text-red-500">Erro ao salvar</span>
-            )}
-          </div>
+          {isAdmin ? (
+            <div className="text-xs font-medium flex items-center justify-center min-w-[80px]">
+              {saveStatus === "saving" && (
+                <span className="flex items-center text-gray-400">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Salvando...
+                </span>
+              )}
+              {saveStatus === "saved" && (
+                <span className="flex items-center text-green-500">
+                  <CheckCircle2 className="w-3 h-3 mr-1" /> Salvo
+                </span>
+              )}
+              {saveStatus === "error" && (
+                <span className="text-red-500">Erro ao salvar</span>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
+              Apenas Leitura
+            </div>
+          )}
           
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors disabled:opacity-50"
-            title="Excluir anotação"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
+          {isAdmin && (
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors disabled:opacity-50"
+              title="Excluir anotação"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
       
@@ -138,7 +148,8 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="bg-brand-primary text-white text-sm border border-white/10 rounded-lg px-3 py-1.5 outline-none focus:border-brand-accent transition-colors"
+            disabled={!isAdmin}
+            className="bg-brand-primary text-white text-sm border border-white/10 rounded-lg px-3 py-1.5 outline-none focus:border-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
       </div>
@@ -149,14 +160,16 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Título"
+          readOnly={!isAdmin}
+          placeholder={isAdmin ? "Título" : "Sem título"}
           className="w-full bg-transparent text-white text-3xl font-bold placeholder-gray-600 outline-none"
         />
         <textarea
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Comece a digitar..."
+          readOnly={!isAdmin}
+          placeholder={isAdmin ? "Comece a digitar..." : "Nota vazia..."}
           className="w-full bg-transparent text-white text-lg placeholder-gray-600 resize-none outline-none min-h-full flex-1 leading-relaxed"
           spellCheck="false"
         />
