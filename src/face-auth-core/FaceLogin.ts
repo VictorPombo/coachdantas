@@ -61,3 +61,49 @@ export async function verifyFaceLogin(
     }
   }
 }
+
+/**
+ * Interface de retorno para Identificação 1:N
+ */
+export interface FaceIdentifyResult {
+  passed: boolean
+  distance: number
+  userId?: string
+  name?: string
+  error?: string
+}
+
+/**
+ * Fluxo para Identificação Facial (1:N)
+ */
+export async function identifyFaceLogin(
+  videoElement: HTMLVideoElement,
+  onProgress?: (step: string) => void
+): Promise<FaceIdentifyResult> {
+  try {
+    onProgress?.('Ajustando captura da face...')
+    const embedding = await captureEmbedding(videoElement, onProgress, { fastMode: true })
+    
+    onProgress?.('Identificando aluno...')
+    const response = await fetch('/api/face-auth/identify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embedding })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Falha ao identificar rosto.')
+    }
+
+    const resultData: FaceIdentifyResult = await response.json()
+    return resultData
+  } catch (error: any) {
+    console.error('[FaceIdentify] Erro:', error)
+    return {
+      passed: false,
+      distance: 1.0,
+      error: error.message || 'Erro inesperado na identificação.'
+    }
+  }
+}

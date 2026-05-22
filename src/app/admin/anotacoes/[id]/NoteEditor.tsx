@@ -65,7 +65,6 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
   }, [content, title, id, initialContent, initialTitle, isAdmin]);
 
   const handleDelete = async () => {
-    if (!isAdmin) return;
     if (window.confirm("Tem certeza que deseja excluir esta anotação?")) {
       setIsDeleting(true);
       try {
@@ -127,16 +126,14 @@ export default function NoteEditor({ id, initialTitle, initialContent, updatedAt
             </div>
           )}
           
-          {isAdmin && (
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors disabled:opacity-50"
-              title="Excluir anotação"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors disabled:opacity-50"
+            title="Excluir anotação"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
         </div>
       </div>
       

@@ -2,6 +2,7 @@ import { Settings as SettingsIcon, MessageSquare, Trophy, Shield } from "lucide-
 import { createClient } from "@/utils/supabase/server";
 import { hasEnrollment } from "@/face-auth-core/database/queries";
 import { FaceAuthSection } from "@/app/aluno/perfil/FaceAuthSection";
+import { ProfileSettingsClient } from "./ProfileSettingsClient";
 
 export default async function AdminConfig() {
   const supabase = await createClient();
@@ -9,14 +10,20 @@ export default async function AdminConfig() {
   
   let isEnrolled = false;
   let role = "student";
+  let fullName = "Usuário Padrão";
+
   if (user) {
     isEnrolled = await hasEnrollment(supabase, user.id);
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, full_name")
       .eq("id", user.id)
       .single();
-    if (profile) role = profile.role;
+      
+    if (profile) {
+      role = profile.role;
+      fullName = profile.full_name || "Usuário";
+    }
   }
   
   const isAdmin = role === "admin";
@@ -80,20 +87,12 @@ export default async function AdminConfig() {
               <h2 className="text-xl font-bold">{isAdmin ? "Segurança & Acessos" : "Segurança da Conta"}</h2>
             </div>
             
+            <ProfileSettingsClient initialName={fullName} role={role} />
+            
             {isAdmin && (
-              <>
-                <div className="flex items-center justify-between p-3 bg-brand-primary rounded-xl border border-white/5 mb-4">
-                  <div>
-                    <div className="font-bold text-sm">Leandro Dantas</div>
-                    <div className="text-xs text-brand-accent">Administrador Principal</div>
-                  </div>
-                  <button className="text-xs text-gray-400 hover:text-white">Editar</button>
-                </div>
-                
-                <div className="mb-4">
-                  <button className="text-xs text-brand-accent hover:underline">+ Adicionar Professor/Admin</button>
-                </div>
-              </>
+              <div className="mb-4">
+                <button className="text-xs text-brand-accent hover:underline">+ Adicionar Professor/Admin</button>
+              </div>
             )}
 
             {user && (

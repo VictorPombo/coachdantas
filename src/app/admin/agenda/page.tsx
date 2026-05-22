@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import AgendaClient from "./AgendaClient";
 import { createClient } from "@/utils/supabase/server";
@@ -31,10 +32,10 @@ export default async function AdminAgenda() {
           <h1 className="text-3xl font-bold mb-2">Agenda de Aulas</h1>
           <p className="text-gray-400">Visualização de turmas, presenças e anotações diárias.</p>
         </div>
-        <button className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 border border-white/10 cursor-pointer">
+        <Link href="/admin/agenda/nova-aula" className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 border border-white/10 cursor-pointer">
           <Plus className="w-5 h-5" />
           Nova Aula
-        </button>
+        </Link>
       </div>
 
       <AgendaClient initialNotes={notes || []} isAdmin={isAdmin} />

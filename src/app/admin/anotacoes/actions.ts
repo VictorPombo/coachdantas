@@ -15,6 +15,17 @@ async function checkIsAdmin(supabase: any, userId: string): Promise<boolean> {
   return profile?.role === "admin";
 }
 
+// Helper function to check if the user is an admin or professor
+async function checkIsAdminOrProfessor(supabase: any, userId: string): Promise<boolean> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single();
+
+  return profile?.role === "admin" || profile?.role === "professor";
+}
+
 export async function getNotes() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -140,10 +151,10 @@ export async function deleteNote(id: string) {
     throw new Error("Não autenticado");
   }
 
-  // Verify that the user is an admin
-  const isAdmin = await checkIsAdmin(supabase, user.id);
-  if (!isAdmin) {
-    throw new Error("Apenas administradores podem excluir anotações.");
+  // Verify that the user is an admin or professor
+  const isAuthorized = await checkIsAdminOrProfessor(supabase, user.id);
+  if (!isAuthorized) {
+    throw new Error("Apenas administradores e professores podem excluir anotações.");
   }
 
   const { error } = await supabase
